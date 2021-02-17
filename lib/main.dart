@@ -92,7 +92,7 @@ class _MainPageState extends State<MainPage> {
     );
     return Scaffold(
       appBar: appBar,
-      body: HomePage(), // new
+      body: HomePage(),
       persistentFooterButtons: [
         Container(
           child: Linkify(
@@ -100,6 +100,7 @@ class _MainPageState extends State<MainPage> {
               fontSize: 12,
             ),
             onOpen: _onOpen,
+            textAlign: TextAlign.left,
             text:
                 "Data last modified on $_lastModified\nPowered by The Blue Alliance https://www.thebluealliance.com",
           ),

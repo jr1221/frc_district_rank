@@ -8,7 +8,7 @@
     </intent>
     </queries>
    <application
-        android:label="frc_district_rank"
+        android:label="FRC District Rank"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

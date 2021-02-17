@@ -338,22 +338,41 @@ class _HomePageState extends State<HomePage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text('Enter Team Number'),
+        title: Text('Enter Team Number', textAlign: TextAlign.center,),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             TextField(
                 keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(
+                  hintText: 'Team # from last 7 years',
+                  border: const OutlineInputBorder(),
+                ),
                 onChanged: (String value) {
                   if (num.tryParse(value) != null) {
                     _team = int.parse(value);
                   } else
                     _team = null;
+                },
+                onSubmitted: (String value) async {
+                  if (num.tryParse(value) != null) {
+                    _team = int.parse(value);
+                    await _addKey(team: _team);
+                    Navigator.pop(context);
+                    _refreshController.requestRefresh();
+                  }
                 }),
+            SizedBox(
+              height: 6,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
+
               children: [
-                ElevatedButton(
+                Expanded(
+                  flex: 2,
+                child: ElevatedButton(
                     onPressed: () async {
                       if (_team != null && _team != 0) {
                         await _addKey(team: _team);
@@ -361,7 +380,10 @@ class _HomePageState extends State<HomePage> {
                         _refreshController.requestRefresh();
                       }
                     },
-                    child: Text('Save')),
+                    child: Text('Save'),
+
+                ),
+                ),
               ],
             ),
           ],
@@ -381,13 +403,6 @@ class _HomePageState extends State<HomePage> {
     await _getDistrictRankings()
         .whenComplete(() => _refreshController.refreshCompleted());
     _format();
-    print(_districtRank);
-    print(_districtRankPretty);
-    print(_year);
-    print(_district);
-    print(_districtPretty);
-    print(_team);
-    print(_yearsRanked.toString());
     setState(() {
       _districtRankPretty = _districtRankPretty;
       _fontRank = _fontRank;
