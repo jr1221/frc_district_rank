@@ -338,7 +338,8 @@ class _HomePageState extends State<HomePage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text('Enter Team Number', textAlign: TextAlign.center,),
+        title: Text(
+          'Enter Team Number', textAlign: TextAlign.center,),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -368,11 +369,10 @@ class _HomePageState extends State<HomePage> {
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-
               children: [
                 Expanded(
                   flex: 2,
-                child: ElevatedButton(
+                  child: ElevatedButton(
                     onPressed: () async {
                       if (_team != null && _team != 0) {
                         await _addKey(team: _team);
@@ -381,8 +381,7 @@ class _HomePageState extends State<HomePage> {
                       }
                     },
                     child: Text('Save'),
-
-                ),
+                  ),
                 ),
               ],
             ),
