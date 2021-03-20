@@ -225,13 +225,17 @@ class _HomePageState extends State<HomePage> {
       aboutText += '\n\n${_teamObj.schoolName}';
       aboutText +=
           '\n${_teamObj.city}, ${_teamObj.stateProv}, ${_teamObj.country} ${_teamObj.postalCode}';
-      return Linkify(
-        text: aboutText,
-        onOpen: _onOpen,
-        style: TextStyle(fontSize: 14, color: Colors.blueGrey),
+      return Center(
+        child: Linkify(
+          textAlign: TextAlign.center,
+          text: aboutText,
+          onOpen: _onOpen,
+          style: TextStyle(fontSize: 14, color: Colors.blueGrey),
+        ),
       );
     } else
-      return Text('No data here:(  Team $_team may not have played in $_year.');
+      return Text('No data here:(  Team $_team may not have played in $_year.',
+          style: TextStyle(color: Colors.teal));
   }
 
   _createAwards() {
@@ -248,13 +252,15 @@ class _HomePageState extends State<HomePage> {
           });
         }
       });
-      return Text(
-        awardText,
-        style: TextStyle(fontSize: 14, color: Colors.blueGrey),
-        textAlign: TextAlign.center,
+      return Center(
+        child: Text(
+          awardText,
+          style: TextStyle(fontSize: 14, color: Colors.blueGrey),
+          textAlign: TextAlign.center,
+        ),
       );
     } else {
-      return Text("No awards in $_year");
+      return Text("No awards in $_year", style: TextStyle(color: Colors.teal));
     }
   }
 
@@ -262,7 +268,8 @@ class _HomePageState extends State<HomePage> {
     if (_rankings != null && _rankings.isNotEmpty) {
       String scoreInfo;
       for (var element in _rankings) {
-        if (_team.toString() == element.teamKey.substring(3)) {
+        if (_team.toString() == element.teamKey.substring(3) &&
+            element.pointTotal != 0) {
           scoreInfo = '${element.pointTotal} Points';
           if (element.rookieBonus != 0)
             scoreInfo = '${element.rookieBonus} rookie points.';
@@ -271,17 +278,28 @@ class _HomePageState extends State<HomePage> {
             scoreInfo += '\n\n${element2.eventKey}';
             if (element2.districtCmp) scoreInfo += '\nDistrict Event';
             scoreInfo += '\n${element2.total} Total Points.  Breakdown;';
-            scoreInfo += '\nAwards:          ${element2.alliancePoints}';
-            scoreInfo += '\nPlayoff:           ${element2.elimPoints}';
-            scoreInfo += '\nAlliance:          ${element2.alliancePoints}';
-            scoreInfo += '\nQualification: ${element2.qualPoints}';
+            scoreInfo += '\nAwards:           ${element2.alliancePoints}';
+            scoreInfo += '\nPlayoff:            ${element2.elimPoints}';
+            scoreInfo += '\nAlliance:           ${element2.alliancePoints}';
+            scoreInfo += '\nQualification:  ${element2.qualPoints}';
           });
-          return Text(scoreInfo);
+          return Center(
+              child: Text(
+            scoreInfo,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.blueGrey),
+          ));
         }
       }
-      return Text('Team $_team does not compete in $_year!');
+      return Text(
+        'Team $_team does not or has not competed in $_year!',
+        style: TextStyle(color: Colors.teal),
+      );
     } else {
-      return Text('Team $_team does not compete in $_year!');
+      return Text(
+        'Team $_team does not or has not competed in $_year!',
+        style: TextStyle(color: Colors.teal),
+      );
     }
   }
 
@@ -291,45 +309,53 @@ class _HomePageState extends State<HomePage> {
       if (_team.toString() == element.teamKey.substring(3)) {
         rowList.add(DataRow(cells: <DataCell>[
           DataCell(Text(element.rank.toString(),
-              style: TextStyle(fontWeight: FontWeight.w900))),
+              style: TextStyle(
+                  fontWeight: FontWeight.w900, color: Colors.blueGrey))),
           DataCell(Text(
             element.teamKey.substring(3),
-            style: TextStyle(fontWeight: FontWeight.w900),
+            style:
+                TextStyle(fontWeight: FontWeight.w900, color: Colors.blueGrey),
           )),
           DataCell(Text(element.pointTotal.toString(),
-              style: TextStyle(fontWeight: FontWeight.w900))),
+              style: TextStyle(
+                  fontWeight: FontWeight.w900, color: Colors.blueGrey))),
         ]));
       } else if (6 > (element.rank - _districtRank) &&
           -6 < (element.rank - _districtRank)) {
         rowList.add(DataRow(cells: <DataCell>[
-          DataCell(Text(element.rank.toString())),
-          DataCell(Text(element.teamKey.substring(3))),
-          DataCell(Text(element.pointTotal.toString())),
+          DataCell(Text(element.rank.toString(),
+              style: TextStyle(color: Colors.blueGrey))),
+          DataCell(Text(element.teamKey.substring(3),
+              style: TextStyle(color: Colors.blueGrey))),
+          DataCell(Text(element.pointTotal.toString(),
+              style: TextStyle(color: Colors.blueGrey))),
         ]));
       }
     }
-    return DataTable(
-      columns: const <DataColumn>[
-        DataColumn(
-          label: Text(
-            'Rank',
-            style: TextStyle(fontStyle: FontStyle.italic),
+    return Center(
+      child: DataTable(
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text(
+              'Rank',
+              style: TextStyle(fontStyle: FontStyle.italic, color: Colors.blueGrey),
+            ),
           ),
-        ),
-        DataColumn(
-          label: Text(
-            'Team',
-            style: TextStyle(fontStyle: FontStyle.italic),
+          DataColumn(
+            label: Text(
+              'Team',
+              style: TextStyle(fontStyle: FontStyle.italic, color: Colors.blueGrey),
+            ),
           ),
-        ),
-        DataColumn(
-          label: Text(
-            'Points',
-            style: TextStyle(fontStyle: FontStyle.italic),
+          DataColumn(
+            label: Text(
+              'Points',
+              style: TextStyle(fontStyle: FontStyle.italic, color: Colors.blueGrey),
+            ),
           ),
-        ),
-      ],
-      rows: rowList,
+        ],
+        rows: rowList,
+      ),
     );
   }
 
@@ -339,7 +365,9 @@ class _HomePageState extends State<HomePage> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Text(
-          'Enter Team Number', textAlign: TextAlign.center,),
+          'Enter Team Number',
+          textAlign: TextAlign.center,
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
