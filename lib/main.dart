@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:frc_district_rank/appwrite.dart';
 import 'package:tba_api_client/api.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'home_rank.dart';
 import 'ApiKey.dart';
+import 'login.dart';
 
 void main() {
+  ManageAppwrite.initAppwrite();
   defaultApiClient.getAuthentication<ApiKeyAuth>('apiKey').apiKey =
       ApiKey.TBAKey;
   runApp(MyApp());
@@ -89,6 +92,16 @@ class _MainPageState extends State<MainPage> {
     AppBar appBar = AppBar(
       title: Text('FRC District Ranking'),
       centerTitle: true,
+      actions: [
+        IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Login()),
+              );
+            },
+            icon: const Icon(Icons.login)),
+      ],
     );
     return Scaffold(
       appBar: appBar,
