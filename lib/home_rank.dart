@@ -216,7 +216,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _createAbout() {
-    if (_teamObj != null && _awards.isNotEmpty) {
+    if (_teamObj != null && _awards != null && _awards.isNotEmpty) {
       String aboutText = '';
       aboutText += '${_teamObj.nickname}';
       aboutText += '\n\n${_teamObj.name}';
@@ -338,19 +338,22 @@ class _HomePageState extends State<HomePage> {
           DataColumn(
             label: Text(
               'Rank',
-              style: TextStyle(fontStyle: FontStyle.italic, color: Colors.blueGrey),
+              style: TextStyle(
+                  fontStyle: FontStyle.italic, color: Colors.blueGrey),
             ),
           ),
           DataColumn(
             label: Text(
               'Team',
-              style: TextStyle(fontStyle: FontStyle.italic, color: Colors.blueGrey),
+              style: TextStyle(
+                  fontStyle: FontStyle.italic, color: Colors.blueGrey),
             ),
           ),
           DataColumn(
             label: Text(
               'Points',
-              style: TextStyle(fontStyle: FontStyle.italic, color: Colors.blueGrey),
+              style: TextStyle(
+                  fontStyle: FontStyle.italic, color: Colors.blueGrey),
             ),
           ),
         ],
@@ -585,7 +588,7 @@ class _HomePageState extends State<HomePage> {
             SizedBox(
               height: 30.0,
             ),
-            if (_yearsRanked.isNotEmpty)
+            if (_yearsRanked != null && _yearsRanked.isNotEmpty)
               Center(
                 child: DropdownButton<String>(
                   value: _year,

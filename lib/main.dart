@@ -1,23 +1,45 @@
+import 'package:appwrite/appwrite.dart';
+import 'package:encrypt/encrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_district_rank/appwrite.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tba_api_client/api.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'account.dart';
 import 'home_rank.dart';
 import 'ApiKey.dart';
 import 'login.dart';
+import 'constants.dart';
 
 void main() {
-  ManageAppwrite.initAppwrite();
   defaultApiClient.getAuthentication<ApiKeyAuth>('apiKey').apiKey =
       ApiKey.TBAKey;
   runApp(MyApp());
+  ManageAppwrite.initAppwrite();
+  autoLogin();
+
+}
+Future<void> autoLogin() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final email = prefs.get('email');
+  final password = prefs.get('password');
+  if (email != null && password != null) {
+    final String decryptedPass = Constants.encrypter
+        .decrypt(Encrypted.fromBase64(password), iv: Constants.iv);
+    await ManageAppwrite.createSession(email: email, password: decryptedPass);
+  }
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: '/',
+      routes: {
+        '/account': (context) => AccountInfo(),
+        '/login': (context) => ShowLogin(),
+      },
       title: '',
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
@@ -59,7 +81,6 @@ class _MainPageState extends State<MainPage> {
         }
       });
     } catch (e) {
-      print("$e");
       await showDialog(
         context: context,
         barrierDismissible: true,
@@ -71,21 +92,14 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+
+
   @override
   void initState() {
     super.initState();
     _getStatus();
   }
 
-  Future selectNotification(String payload) async {
-    if (payload != null) {
-      debugPrint('notification payload: $payload');
-    }
-    await Navigator.push(
-      context,
-      MaterialPageRoute<void>(builder: (context) => MyApp()),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,10 +109,10 @@ class _MainPageState extends State<MainPage> {
       actions: [
         IconButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Login()),
-              );
+              if (ManageAppwrite.loggedIn)
+                Navigator.pushNamed(context, '/account');
+              else
+                Navigator.pushNamed(context, '/login');
             },
             icon: const Icon(Icons.login)),
       ],

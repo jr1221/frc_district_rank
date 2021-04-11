@@ -23,7 +23,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http:
   tba_api_client:
     git: https://github.com/jr1221/tba-api-client-dart.git
   pull_to_refresh:
@@ -34,15 +33,20 @@ dependencies:
   confetti:
   email_validator:
   appwrite:
+    git:
+      url: https://github.com/appwrite/sdk-for-flutter.git
+      ref: feat-null-safety-new
   modal_progress_hud:
+  encrypt:
+
+
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -1,11 +1,17 @@
 import 'package:appwrite/appwrite.dart';
 import 'dart:core';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'constants.dart';
+
 class ManageAppwrite {
   static Client client = Client();
   static Account account;
 
-  static void initAppwrite() async {
+  static bool loggedIn = false;
+
+  static void initAppwrite()  {
     client
             .setEndpoint('https://am.encrypt.se/v1') // Your Appwrite Endpoint
             .setProject('605b81a2cfd2b') // Your project ID
@@ -31,7 +37,7 @@ class ManageAppwrite {
       }
     } catch (e) {
       if (e is AppwriteException) {
-        return '${e.response}, ${e.message}, ${e.code}';
+        return e.message;
       }
       return "Unknown error: \n ${e.toString()}";
     }
@@ -53,10 +59,15 @@ class ManageAppwrite {
       }
     } catch (e) {
       if (e is AppwriteException) {
-        return '${e.response}, ${e.message}, ${e.code}';
+        return e.message;
       }
       return "Unknown error: \n ${e.toString()}";
     }
+    loggedIn = true;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("email", email);
+    prefs.setString('password',
+        Constants.encrypter.encrypt(password, iv: Constants.iv).base64);
     return result;
   }
 
@@ -64,12 +75,16 @@ class ManageAppwrite {
     Response result;
     try {
       result = await account.deleteSession(sessionId: 'current');
-    } catch (Ignored) {
-      return false;
+    } catch (e) {
+      if (e is AppwriteException) {
+        return false;
+      } else
+        return false;
     }
-    if (result.statusCode == 204)
+    if (result.statusCode == 204) {
+      loggedIn = false;
       return true;
-    else
+    } else
       return false;
   }
 
@@ -77,12 +92,16 @@ class ManageAppwrite {
     Response result;
     try {
       result = await account.deleteSessions();
-    } catch (Ignored) {
-      return false;
+    } catch (e) {
+      if (e is AppwriteException) {
+        return false;
+      } else
+        return false;
     }
-    if (result.statusCode == 204)
+    if (result.statusCode == 204) {
+      loggedIn = false;
       return true;
-    else
+    } else
       return false;
   }
 
@@ -95,18 +114,23 @@ class ManageAppwrite {
       }
     } catch (e) {
       if (e is AppwriteException) {
-        return '${e.response}, ${e.message}, ${e.code}';
+        return e.message;
       }
       return "Unknown error: \n ${e.toString()}";
     }
     return user;
   }
 
-  static Future<String> addPref({String key, String value}) async {
-    Response result = await account.updatePrefs(prefs: {key: value});
-    if (result.statusCode >= 400) {
-      return "Unknown error: \n ${result.statusMessage}";
-    } else
-      return '';
+  static Future<dynamic> addPref({String key, String value}) async {
+    var result;
+    try {
+      result = await account.updatePrefs(prefs: {key: value});
+    } catch (e) {
+      if (e is AppwriteException) {
+        return e.message;
+      } else
+        return "Unknown error: \n ${e.toString()}";
+    }
+    return result;
   }
 }
