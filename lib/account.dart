@@ -1,6 +1,7 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'appwrite.dart';
 
@@ -14,13 +15,44 @@ class _AccountInfoState extends State<AccountInfo> {
   String _name = 'Loading...';
 
   Future<void> _logOut({bool ofAll}) async {
-    bool respBool;
     if (ofAll)
-      respBool = await ManageAppwrite.logoutAll();
+      await ManageAppwrite.logoutAll();
     else
-      respBool = await ManageAppwrite.logout();
-    if (!ManageAppwrite.loggedIn) Navigator.of(context)
-        .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+      await ManageAppwrite.logout();
+    if (!ManageAppwrite.loggedIn)
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+  }
+
+  Future<void> _deleteAccount() async {
+    await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              title: Text('Delete account?'),
+              content: Text(
+                  'This will delete all user preferences and data automatically.  You will not be able to recreate your account!'),
+              actions: [
+                ElevatedButton(
+                  child: Text("Cancel"),
+                  onPressed: () {
+                    return;
+                  },
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    'Yes, delete account',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            ));
+    await ManageAppwrite.deleteAccount();
+    if (!ManageAppwrite.loggedIn) {
+      SharedPreferences.getInstance().then((value) => value.clear());
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+    }
   }
 
   Future<void> _addUserInfo() async {
@@ -96,6 +128,15 @@ class _AccountInfoState extends State<AccountInfo> {
                     await _logOut(ofAll: true);
                   },
                   child: Text("Logout from all devices"),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: TextButton(
+                  onPressed: () async {
+                    //await _deleteAccount();
+                  },
+                  child: Text("Delete Account"),
                 ),
               ),
             ],

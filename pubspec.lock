@@ -65,7 +65,7 @@ packages:
       name: confetti
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.5"
+    version: "0.6.0-nullsafety"
   cookie_jar:
     dependency: transitive
     description:
@@ -147,7 +147,7 @@ packages:
       name: flutter_linkify
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.0.0"
+    version: "5.0.1"
   flutter_web_auth:
     dependency: transitive
     description:
@@ -195,6 +195,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.0.0"
+  loading_overlay:
+    dependency: "direct main"
+    description:
+      name: loading_overlay
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.0"
   meta:
     dependency: transitive
     description:
@@ -202,13 +209,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.3.0"
-  modal_progress_hud:
-    dependency: "direct main"
-    description:
-      name: modal_progress_hud
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.3"
   package_info_plus:
     dependency: transitive
     description:
@@ -334,14 +334,14 @@ packages:
       name: pull_to_refresh
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.4"
+    version: "1.6.4-nullsafety.0"
   random_color:
     dependency: transitive
     description:
       name: random_color
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.5"
+    version: "1.0.6-nullsafety"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -407,8 +407,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
-      resolved-ref: "79af3730d60b8e6182e13e411c109f11f3917e37"
+      ref: nullsafety-test
+      resolved-ref: "0697891c5641be0ddba62e668ae455e547dd8b76"
       url: "https://github.com/jr1221/tba-api-client-dart.git"
     source: git
     version: "3.8.0"

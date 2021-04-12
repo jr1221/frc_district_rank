@@ -1,4 +1,3 @@
-import 'package:appwrite/appwrite.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_district_rank/appwrite.dart';
@@ -18,8 +17,8 @@ void main() {
   runApp(MyApp());
   ManageAppwrite.initAppwrite();
   autoLogin();
-
 }
+
 Future<void> autoLogin() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   final email = prefs.get('email');
@@ -92,14 +91,11 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-
-
   @override
   void initState() {
     super.initState();
     _getStatus();
   }
-
 
   @override
   Widget build(BuildContext context) {
