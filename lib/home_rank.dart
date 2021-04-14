@@ -3,13 +3,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:tba_api_client/api.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:expandable/expandable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tba_api_dart_dio_client/tba_api_dart_dio_client.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:confetti/confetti.dart';
 
+import 'ApiMgr.dart';
 import 'districtCap.dart';
 
 class HomePage extends StatefulWidget {
@@ -67,14 +68,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<bool> _getDistrictKey() async {
-    var apiInstance = TeamApi();
-
     try {
-      var value = await apiInstance.getTeamDistricts('frc$_team');
-      String lastDistrict = value.last.key;
+      final response = await ApiMgr.api
+          .getDistrictApi()
+          .getTeamDistricts(teamKey: 'frc$_team');
+      String lastDistrict = response.data.last.key;
       _yearsRanked.clear();
       bool done = false;
-      for (var element in value) {
+      for (var element in response.data) {
         _yearsRanked.add(element.year.toString());
         if (element.year.toString() == _year) {
           _district = element.key;
@@ -118,32 +119,32 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _getTeamAbout() async {
-    var apiInstance = TeamApi();
-
     try {
-      _teamObj = await apiInstance.getTeam('frc$_team');
+      _teamObj = await ApiMgr.api
+          .getTeamApi()
+          .getTeam(teamKey: 'frc$_team')
+          .then((value) => value.data);
     } catch (e) {}
   }
 
   Future<void> _getAwards() async {
-    var apiInstance = TeamApi();
-
     try {
-      _awards =
-          await apiInstance.getTeamAwardsByYear('frc$_team', int.parse(_year));
+      _awards = await ApiMgr.api
+          .getTeamApi()
+          .getTeamAwardsByYear(teamKey: 'frc$_team', year: int.parse(_year))
+          .then((value) => value.data.asList());
     } catch (e) {}
   }
 
   Future<void> _getAvatar() async {
-    var apiInstance = TeamApi();
-
     try {
-      var value =
-          await apiInstance.getTeamMediaByYear('frc$_team', int.parse(_year));
-      if (value.first.details.toString().contains('base64Image')) {
-        _baseAvatar = value.first.details
+      final response = await ApiMgr.api
+          .getTeamApi()
+          .getTeamMediaByYear(teamKey: 'frc$_team', year: int.parse(_year));
+      if (response.data.first.details.toString().contains('base64Image')) {
+        _baseAvatar = response.data.first.details
             .toString()
-            .substring(14, value.first.details.toString().length - 1);
+            .substring(14, response.data.first.details.toString().length - 1);
         _avatarH = 40;
         _avatarW = 60;
       } else {
@@ -161,10 +162,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _getDistrictRankings() async {
-    var apiInstance = DistrictApi();
-
     try {
-      _rankings = await apiInstance.getDistrictRankings(_district);
+      _rankings = await ApiMgr.api
+          .getDistrictApi()
+          .getDistrictRankings(districtKey: _district)
+          .then((value) => value.data.asList());
       for (var element in _rankings) {
         if (element.teamKey == 'frc$_team') {
           _districtRank = element.rank;

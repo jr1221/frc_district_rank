@@ -23,10 +23,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  tba_api_client:
-    git:
-      url: https://github.com/jr1221/tba-api-client-dart.git
-      ref: nullsafety-test
+  tba_api_dart_dio_client:
+    git: https://github.com/jr1221/tba_api_dart_dio_client
   pull_to_refresh: 1.6.4-nullsafety.0
   flutter_linkify:
   url_launcher:

@@ -2,18 +2,16 @@ import 'package:encrypt/encrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_district_rank/appwrite.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tba_api_client/api.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'ApiMgr.dart';
 import 'account.dart';
 import 'home_rank.dart';
-import 'ApiKey.dart';
 import 'login.dart';
 import 'constants.dart';
 
 void main() {
-  defaultApiClient.getAuthentication<ApiKeyAuth>('apiKey').apiKey =
-      ApiKey.TBAKey;
+  ApiMgr.init();
   runApp(MyApp());
   ManageAppwrite.initAppwrite();
   autoLogin();
@@ -67,18 +65,18 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<void> _getStatus() async {
-    var apiInstance = TBAApi();
-
     try {
-      var value = await apiInstance.getStatusWithHttpInfo();
-      value.headers.forEach((key, value) {
-        if (key == "last-modified") {
-          setState(() {
-            _lastModified = value;
-          });
-          return;
-        }
-      });
+      await ApiMgr.api
+          .getTBAApi()
+          .getStatus()
+          .then((value) => value.headers.forEach((name, values) {
+                if (name == "last-modified") {
+                  setState(() {
+                    _lastModified = values.first;
+                  });
+                  return;
+                }
+              }));
     } catch (e) {
       await showDialog(
         context: context,
