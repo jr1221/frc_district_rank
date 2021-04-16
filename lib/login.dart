@@ -15,9 +15,9 @@ class ShowLogin extends StatefulWidget {
 class ShowLoginState extends State<ShowLogin> {
   final _formKey = GlobalKey<FormState>();
 
-  String _email;
-  String _password;
-  String _name;
+  String? _email;
+  String? _password;
+  String? _name;
 
   bool _saving = false;
 
@@ -34,13 +34,11 @@ class ShowLoginState extends State<ShowLogin> {
     setState(() {
       _saving = true;
     });
-    var resp = await ManageAppwrite.createUser(
-        email: _email, password: _password, name: _name);
+    final resp = await ManageAppwrite.createUser(
+        email: _email!, password: _password!, name: _name!);
     setState(() {
       _saving = false;
     });
-    print(resp);
-    print(resp.runtimeType);
     String respPretty = '';
     if (resp is Response) {
       respPretty = "Successful account creation.  Please login now.";
@@ -60,8 +58,8 @@ class ShowLoginState extends State<ShowLogin> {
       _saving = true;
     });
     final resp = await ManageAppwrite.createSession(
-      email: _email,
-      password: _password,
+      email: _email!,
+      password: _password!,
     );
     setState(() {
       _saving = false;
@@ -88,7 +86,7 @@ class ShowLoginState extends State<ShowLogin> {
   void initState() {
     super.initState();
     if (ManageAppwrite.loggedIn)
-      SchedulerBinding.instance.addPostFrameCallback((_) {
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
         Navigator.of(context).pushNamedAndRemoveUntil(
             '/account', (Route<dynamic> route) => false);
       });
@@ -220,7 +218,7 @@ class ShowLoginState extends State<ShowLogin> {
                           }
                           if (value != _password ||
                               _password == null ||
-                              _password.length < 6) {
+                              _password!.length < 6) {
                             return 'Passwords do not match';
                           }
                           return null;
@@ -230,7 +228,7 @@ class ShowLoginState extends State<ShowLogin> {
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         child: ElevatedButton(
                           onPressed: () async {
-                            if (_formKey.currentState.validate()) {
+                            if (_formKey.currentState!.validate()) {
                               await _createAcc();
                             }
                           },

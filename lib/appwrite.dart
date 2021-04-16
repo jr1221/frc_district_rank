@@ -6,7 +6,7 @@ import 'constants.dart';
 
 class ManageAppwrite {
   static Client client = Client();
-  static Account account;
+  static late Account account;
 
   static bool loggedIn = false;
 
@@ -20,7 +20,9 @@ class ManageAppwrite {
   }
 
   static Future<dynamic> createUser(
-      {String email, String password, String name}) async {
+      {required String email,
+      required String password,
+      required String name}) async {
     Response result;
     if (loggedIn)
       try {
@@ -38,14 +40,16 @@ class ManageAppwrite {
       }
       return "Unknown error: \n ${e.toString()}";
     }
-    if (result.statusCode >= 400) {
+    if (result.statusCode! >= 400) {
       return "Unknown error: \n ${result.statusMessage}";
     }
     return result;
   }
 
   static Future<dynamic> createSession(
-      {String email, String password, bool sendToShared = true}) async {
+      {required String email,
+      required String password,
+      bool sendToShared = true}) async {
     if (loggedIn)
       try {
         await account.deleteSession(sessionId: 'current');
@@ -62,7 +66,7 @@ class ManageAppwrite {
       }
       return "Unknown error: \n ${e.toString()}";
     }
-    if (result.statusCode >= 400) {
+    if (result.statusCode! >= 400) {
       return "Unknown error: \n ${result.statusMessage}";
     }
     loggedIn = true;
@@ -136,13 +140,14 @@ class ManageAppwrite {
       }
       return "Unknown error: \n ${e.toString()}";
     }
-    if (result.statusCode >= 400) {
+    if (result.statusCode! >= 400) {
       return "Unknown error: \n ${result.statusMessage}";
     }
     return result;
   }
 
-  static Future<dynamic> updatePref({String key, String value}) async {
+  static Future<dynamic> updatePref(
+      {required String key, required String value}) async {
     Response result;
     try {
       result = await account.updatePrefs(prefs: {key: value});
@@ -152,13 +157,14 @@ class ManageAppwrite {
       } else
         return "Unknown error: \n ${e.toString()}";
     }
-    if (result.statusCode >= 400) {
+    if (result.statusCode! >= 400) {
       return "Unknown error: \n ${result.statusMessage}";
     }
     return result;
   }
 
-  static Future<dynamic> getPrefs({bool getAll = false, String key}) async {
+  static Future<dynamic> getPrefs(
+      {bool getAll = false, required String key}) async {
     Response result;
     try {
       result = await account.getPrefs();
@@ -168,7 +174,7 @@ class ManageAppwrite {
       } else
         return "Unknown error: \n ${e.toString()}";
     }
-    if (result.statusCode >= 400) {
+    if (result.statusCode! >= 400) {
       return "Unknown error: \n ${result.statusMessage}";
     }
     if (getAll) return result;

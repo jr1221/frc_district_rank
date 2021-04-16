@@ -56,10 +56,9 @@ class _HomePageState extends State<HomePage> {
           height: 2,
           color: Colors.blueGrey,
         ),
-        onChanged: (String newValue) {
+        onChanged: (newValue) {
           setState(() {
-            dataPack.year = int.parse(newValue);
-            print(dataPack.year);
+            dataPack.year = int.parse(newValue!);
             _refreshController.requestRefresh();
           });
         },
@@ -99,7 +98,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _chooseTeam() {
-    int team;
+    int team = 0;
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -122,7 +121,7 @@ class _HomePageState extends State<HomePage> {
                   if (num.tryParse(value) != null) {
                     team = int.parse(value);
                   } else
-                    team = null;
+                    team = 0;
                 },
                 onSubmitted: (String value) async {
                   if (num.tryParse(value) != null) {
@@ -139,7 +138,7 @@ class _HomePageState extends State<HomePage> {
                   flex: 2,
                   child: ElevatedButton(
                     onPressed: () async {
-                      if (team != null && team != 0) {
+                      if (team != 0) {
                         dataPack.team = team;
                         Navigator.pop(context);
                         _refreshController.requestRefresh();
@@ -230,14 +229,14 @@ class _HomePageState extends State<HomePage> {
       _refreshController.headerStatus;
     });
     if (dataPack.year == 2019 &&
-        DistrictCap(dataPack.district).capacity >= dataPack.districtRank)
-      _confettiController.play();
+        DistrictCap(districtKey: dataPack.district).capacity >=
+            dataPack.districtRank) _confettiController.play();
   }
 
   Future<void> _fillKeys() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int team = prefs.getInt('team');
-    int year = prefs.getInt('year');
+    int? team = prefs.getInt('team');
+    int? year = prefs.getInt('year');
     if (team != null && year != null) {
       dataPack.team = team;
       dataPack.year = year;
@@ -325,7 +324,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       child: ExpandablePanel(
                         header: Text(
-                          "About Team ${dataPack.team ?? 2712}",
+                          "About Team ${dataPack.team}",
                           style:
                               TextStyle(fontSize: 20, color: Colors.blueGrey),
                         ),
@@ -405,7 +404,7 @@ class InfoPackage {
   List<Award> awards = [];
   List<DistrictRanking> rankings = [];
   String baseAvatar = '';
-  Team teamObj;
+  Team? teamObj;
 
   String districtRankPretty = '';
   String districtPretty = '';
@@ -420,20 +419,20 @@ class InfoPackage {
   InfoPackage();
 
   InfoPackage.clone(
-      {this.team,
-      this.year,
-      this.districtRank,
-      this.district,
-      this.awards,
-      this.rankings,
-      this.baseAvatar,
-      this.teamObj,
-      this.districtRankPretty,
-      this.districtPretty,
-      this.fontRank,
-      this.yearsRanked,
-      this.avatarW,
-      this.avatarH});
+      {required this.team,
+      required this.year,
+      required this.districtRank,
+      required this.district,
+      required this.awards,
+      required this.rankings,
+      required this.baseAvatar,
+      required this.teamObj,
+      required this.districtRankPretty,
+      required this.districtPretty,
+      required this.fontRank,
+      required this.yearsRanked,
+      required this.avatarW,
+      required this.avatarH});
 
   InfoPackage clone() {
     return InfoPackage.clone(
@@ -465,6 +464,7 @@ class InfoPackage {
       await getDistrictKey();
       print('a');
       await getTeamAbout();
+      assert(teamObj != null);
       print('b');
       await getAwards();
       print('c');
@@ -497,7 +497,7 @@ class InfoPackage {
   }
 
   void format() {
-    districtPretty = district.substring(4).toUpperCase() ?? 'N/A';
+    districtPretty = district.substring(4).toUpperCase();
     districtPretty += " District";
     switch (
         districtRank.toString().substring(districtRank.toString().length - 1)) {
@@ -533,12 +533,12 @@ class InfoPackage {
       final response = await ApiMgr.api
           .getDistrictApi()
           .getTeamDistricts(teamKey: 'frc$team');
-      if (response.data.isNotEmpty) {
-        int lastDistrictYear = response.data.last.year;
-        String lastDistrict = response.data.last.key;
+      if (response.data!.isNotEmpty) {
+        int lastDistrictYear = response.data!.last.year;
+        String lastDistrict = response.data!.last.key;
         yearsRanked.clear();
         bool done = false;
-        for (var element in response.data) {
+        for (var element in response.data!) {
           yearsRanked.add(element.year.toString());
           if (element.year == year) {
             district = element.key;
@@ -552,13 +552,12 @@ class InfoPackage {
           _addKeys();
           throw 'Team $team may not have competed in $failedYear. Redirecting to $year.';
         }
-        return true;
-      }
-      throw 2;
+      } else
+        throw 2;
     } on DioError catch (e) {
       if (e.response == null)
         throw 'Cannot connect to server.  Check your internet connection!';
-      if (e.response.statusCode != null && e.response.statusCode == 404) {
+      if (e.response!.statusCode != null && e.response!.statusCode == 404) {
         if (e.response.toString().contains('does not exist'))
           throw 2; // Choose team, team doesnt exist
       }
@@ -576,14 +575,14 @@ class InfoPackage {
     teamObj = await ApiMgr.api
         .getTeamApi()
         .getTeam(teamKey: 'frc$team')
-        .then((value) => value.data);
+        .then((value) => value.data!);
   }
 
   Future<void> getAwards() async {
     awards = await ApiMgr.api
         .getTeamApi()
         .getTeamAwardsByYear(teamKey: 'frc$team', year: year)
-        .then((value) => value.data.asList());
+        .then((value) => value.data!.asList());
   }
 
   Future<void> getAvatar() async {
@@ -591,11 +590,11 @@ class InfoPackage {
         .getTeamApi()
         .getTeamMediaByYear(teamKey: 'frc$team', year: year);
 
-    if (response.data.isNotEmpty &&
-        response.data.first.details.toString().contains('base64Image')) {
-      baseAvatar = response.data.first.details
+    if (response.data!.isNotEmpty &&
+        response.data!.first.details.toString().contains('base64Image')) {
+      baseAvatar = response.data!.first.details
           .toString()
-          .substring(14, response.data.first.details.toString().length - 1);
+          .substring(14, response.data!.first.details.toString().length - 1);
       avatarH = 40;
       avatarW = 60;
     } else {
@@ -609,7 +608,7 @@ class InfoPackage {
     rankings = await ApiMgr.api
         .getDistrictApi()
         .getDistrictRankings(districtKey: district)
-        .then((value) => value.data.asList());
+        .then((value) => value.data!.asList());
     for (var element in rankings) {
       if (element.teamKey == 'frc$team') {
         districtRank = element.rank;
@@ -651,7 +650,7 @@ class InfoPackage {
           ),
           if (year == 2019)
             TextSpan(
-              text: DistrictCap(district).prettyCapacity(),
+              text: DistrictCap(districtKey: district).prettyCapacity(),
               style: TextStyle(fontSize: 22, color: Colors.black),
             ),
         ],
@@ -661,13 +660,13 @@ class InfoPackage {
 
   Center createAbout() {
     String aboutText = '';
-    aboutText += '${teamObj.nickname}';
-    aboutText += '\n\n${teamObj.name}';
-    aboutText += '\n\n${teamObj.website}';
-    aboutText += '\n\nRookie year: ${teamObj.rookieYear}';
-    aboutText += '\n\n${teamObj.schoolName}';
+    aboutText += '${teamObj!.nickname}';
+    aboutText += '\n\n${teamObj!.name}';
+    aboutText += '\n\n${teamObj!.website}';
+    aboutText += '\n\nRookie year: ${teamObj!.rookieYear}';
+    aboutText += '\n\n${teamObj!.schoolName}';
     aboutText +=
-        '\n${teamObj.city}, ${teamObj.stateProv}, ${teamObj.country} ${teamObj.postalCode}';
+        '\n${teamObj!.city}, ${teamObj!.stateProv}, ${teamObj!.country} ${teamObj!.postalCode}';
     return Center(
       child: Linkify(
         textAlign: TextAlign.center,
@@ -682,9 +681,7 @@ class InfoPackage {
     String awardText = '';
     awards.forEach((element) {
       awardText += "${element.name} -- Event: ${element.eventKey}\n\n";
-      if (element.recipientList != null &&
-          element.recipientList.isNotEmpty &&
-          element.recipientList.first.awardee != null) {
+      if (element.recipientList.isNotEmpty) {
         awardText += '\nGiven to: ';
         element.recipientList.forEach((element) {
           awardText += "${element.awardee} (${element.teamKey})  ";
@@ -709,7 +706,7 @@ class InfoPackage {
         if (element.rookieBonus != 0)
           scoreInfo = '${element.rookieBonus} rookie points.';
         scoreInfo += '\n\nEvents:';
-        element.eventPoints.forEach((element2) {
+        element.eventPoints!.forEach((element2) {
           scoreInfo += '\n\n${element2.eventKey}';
           if (element2.districtCmp) scoreInfo += '\nDistrict Event';
           scoreInfo += '\n${element2.total} Total Points.  Breakdown;';

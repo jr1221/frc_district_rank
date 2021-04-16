@@ -11,10 +11,10 @@ class AccountInfo extends StatefulWidget {
 }
 
 class _AccountInfoState extends State<AccountInfo> {
-  String/*!*/ _email = 'Loading...';
-  String/*!*/ _name = 'Loading...';
+  String _email = 'Loading...';
+  String _name = 'Loading...';
 
-  Future<void> _logOut({bool ofAll}) async {
+  Future<void> _logOut({required bool ofAll}) async {
     if (ofAll)
       await ManageAppwrite.logoutAll();
     else
@@ -68,7 +68,7 @@ class _AccountInfoState extends State<AccountInfo> {
   void initState() {
     super.initState();
     if (!ManageAppwrite.loggedIn)
-      SchedulerBinding.instance.addPostFrameCallback((_) {
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
         Navigator.of(context)
             .pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
       });
@@ -133,7 +133,7 @@ class _AccountInfoState extends State<AccountInfo> {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: TextButton(
-                  onPressed: (){},
+                  onPressed: () {},
                   child: Text("Delete Account"),
                 ),
               ),

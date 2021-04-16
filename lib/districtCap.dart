@@ -1,8 +1,7 @@
 class DistrictCap {
-  int capacity;
+  late int capacity;
 
-  DistrictCap(String districtKey) {
-    districtKey ??= '2019ne';
+  DistrictCap({required String districtKey}) {
     switch (districtKey) {
       case '2019chs':
         capacity = 58;

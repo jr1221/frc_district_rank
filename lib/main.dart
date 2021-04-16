@@ -23,8 +23,9 @@ Future<void> autoLogin() async {
   final password = prefs.get('password');
   if (email != null && password != null) {
     final String decryptedPass = Constants.encrypter
-        .decrypt(Encrypted.fromBase64(password), iv: Constants.iv);
-    await ManageAppwrite.createSession(email: email, password: decryptedPass);
+        .decrypt(Encrypted.fromBase64(password.toString()), iv: Constants.iv);
+    await ManageAppwrite.createSession(
+        email: email.toString(), password: decryptedPass);
   }
 }
 
