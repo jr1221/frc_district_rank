@@ -23,8 +23,6 @@ class _HomePageState extends State<HomePage> {
   InfoPackage dataPack = InfoPackage();
   InfoPackage dataPackStable = InfoPackage();
 
-  bool _dataIn = false;
-
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
@@ -32,8 +30,6 @@ class _HomePageState extends State<HomePage> {
       ConfettiController(duration: const Duration(seconds: 1));
 
   _createAvatarSection() {
-    print('rebuilding');
-    print(_dataIn);
     return dataPack.createAvatar();
   }
 
@@ -161,7 +157,6 @@ class _HomePageState extends State<HomePage> {
 
     if (result != '0') {
       _refreshController.refreshFailed();
-      _dataIn = false;
       if (result != '2') {
         await showDialog(
             context: context,
@@ -191,7 +186,6 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () {
                         dataPack = dataPackStable.clone();
                         _refreshController.refreshCompleted();
-                        print(dataPack.districtPretty);
                         setState(() {
                           _refreshController.headerStatus;
                         });
@@ -223,8 +217,6 @@ class _HomePageState extends State<HomePage> {
     }
     dataPackStable = dataPack.clone();
     _refreshController.refreshCompleted();
-    print('complete');
-    _dataIn = true;
     setState(() {
       _refreshController.headerStatus;
     });
@@ -462,22 +454,16 @@ class InfoPackage {
     // 2 is ask for new team // 0 is success // all other string is a failure message
     try {
       await getDistrictKey();
-      print('a');
       await getTeamAbout();
       assert(teamObj != null);
-      print('b');
       await getAwards();
-      print('c');
       await getAvatar(); // TODO: maybe API will throw error on no avatar, examine response so blank avatar can be inserted
-      print('d');
       await getDistrictRankings();
-      print('e');
       format();
       _addKeys();
     } on DioError catch (e) {
       return e.message;
     } catch (e) {
-      print(e.toString());
       if (e is String) {
         return e;
       } else if (e is int && e == 2) {
