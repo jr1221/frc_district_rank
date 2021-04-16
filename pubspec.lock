@@ -80,6 +80,34 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.0-nullsafety"
+  connectivity:
+    dependency: "direct main"
+    description:
+      name: connectivity
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.3"
+  connectivity_for_web:
+    dependency: transitive
+    description:
+      name: connectivity_for_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.0"
+  connectivity_macos:
+    dependency: transitive
+    description:
+      name: connectivity_macos
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.0"
+  connectivity_platform_interface:
+    dependency: transitive
+    description:
+      name: connectivity_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
   cookie_jar:
     dependency: transitive
     description:
@@ -429,7 +457,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: ed582ea073a08677dd33ac1967545930d6dfc72b
+      resolved-ref: "0d233236f6ba3a89b99c4d46f09c9313a9848cc0"
       url: "https://github.com/jr1221/tba_api_dart_dio_client"
     source: git
     version: "0.0.1"

@@ -26,6 +26,7 @@ dependencies:
   tba_api_dart_dio_client:
     git: https://github.com/jr1221/tba_api_dart_dio_client
   pull_to_refresh: 1.6.4-nullsafety.0
+  connectivity:
   flutter_linkify:
   url_launcher:
   expandable:

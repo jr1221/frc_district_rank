@@ -11,8 +11,8 @@ class AccountInfo extends StatefulWidget {
 }
 
 class _AccountInfoState extends State<AccountInfo> {
-  String _email = 'Loading...';
-  String _name = 'Loading...';
+  String/*!*/ _email = 'Loading...';
+  String/*!*/ _name = 'Loading...';
 
   Future<void> _logOut({bool ofAll}) async {
     if (ofAll)
@@ -39,7 +39,7 @@ class _AccountInfoState extends State<AccountInfo> {
                   },
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {}, // TODO: Delete account feature
                   child: Text(
                     'Yes, delete account',
                     style: TextStyle(color: Colors.red),
@@ -133,9 +133,7 @@ class _AccountInfoState extends State<AccountInfo> {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: TextButton(
-                  onPressed: () async {
-                    //await _deleteAccount();
-                  },
+                  onPressed: (){},
                   child: Text("Delete Account"),
                 ),
               ),

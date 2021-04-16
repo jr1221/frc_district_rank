@@ -37,6 +37,8 @@ class DistrictCap {
       case '2019tx':
         capacity = 64;
         return;
+      default:
+        capacity = -1;
     }
   }
 

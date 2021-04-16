@@ -54,8 +54,6 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  String _lastModified = '';
-
   Future<void> _onOpen(LinkableElement link) async {
     if (await canLaunch(link.url)) {
       await launch(link.url);
@@ -64,35 +62,9 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  Future<void> _getStatus() async {
-    try {
-      await ApiMgr.api
-          .getTBAApi()
-          .getStatus()
-          .then((value) => value.headers.forEach((name, values) {
-                if (name == "last-modified") {
-                  setState(() {
-                    _lastModified = values.first;
-                  });
-                  return;
-                }
-              }));
-    } catch (e) {
-      await showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (context) => new AlertDialog(
-          title: new Text('Error!'),
-          content: Text('$e'),
-        ),
-      );
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    _getStatus();
   }
 
   @override
@@ -123,7 +95,7 @@ class _MainPageState extends State<MainPage> {
             onOpen: _onOpen,
             textAlign: TextAlign.left,
             text:
-                "Data last modified on $_lastModified\nPowered by The Blue Alliance https://www.thebluealliance.com",
+                "Powered by The Blue Alliance https://www.thebluealliance.com",
           ),
         ),
       ],
