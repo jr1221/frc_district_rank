@@ -457,7 +457,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "0d233236f6ba3a89b99c4d46f09c9313a9848cc0"
+      resolved-ref: "622051c4cc4007d6ff43193db41fdbb3aeb70504"
       url: "https://github.com/jr1221/tba_api_dart_dio_client"
     source: git
     version: "0.0.1"

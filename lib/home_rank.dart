@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:expandable/expandable.dart';
@@ -80,14 +81,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   _createAwardsSection() {
-    return dataPack.createAbout();
+    return dataPack.createAwards();
   }
 
   _createScoringSection() {
     return dataPack.createScoring();
   }
-
-  // TODO: check for leaderboard missing stuff even if used above
 
   _createLeaderboardSection() {
     return dataPack.createLeaderboard();
@@ -156,46 +155,12 @@ class _HomePageState extends State<HomePage> {
     final String result = await dataPack.refresh();
 
     if (result != '0') {
-      _refreshController.refreshFailed();
-      if (result != '2') {
-        await showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-                  title: Text('Error'),
-                  content: ListView(
-                    children: [
-                      Text(result),
-                      SizedBox(height: 15),
-                      Text(
-                        'You can retry the same search or you may need to cancel and try a different search.',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    ElevatedButton(
-                      child: Text("Retry"),
-                      onPressed: () {
-                        _refreshController.requestRefresh();
-                        Navigator.pop(context);
-                        return;
-                      },
-                    ),
-                    ElevatedButton(
-                      child: Text("Cancel"),
-                      onPressed: () {
-                        dataPack = dataPackStable.clone();
-                        _refreshController.refreshCompleted();
-                        setState(() {
-                          _refreshController.headerStatus;
-                        });
-                        Navigator.pop(context);
-                        return;
-                      },
-                    ),
-                  ],
-                ));
-      } else if (result == '2') {
+      print(result);
+      setState(() {
+        _refreshController.refreshFailed();
+        _refreshController.headerStatus;
+      });
+      if (result == '2') {
         await showDialog(
             context: context,
             builder: (_) => SimpleDialog(
@@ -210,6 +175,65 @@ class _HomePageState extends State<HomePage> {
                         return;
                       },
                     )
+                  ],
+                ));
+      }
+      else if (result.startsWith('3')) {
+        await showDialog(
+            context: context,
+            builder: (_) => SimpleDialog(
+                  title: Text(result.substring(1)),
+                  children: [
+                    ElevatedButton(
+                      child: Text("Ok"),
+                      onPressed: () async {
+                        _refreshController.requestRefresh();
+                        Navigator.pop(context);
+                        return;
+                      },
+                    )
+                  ],
+                ));
+      } else {
+        await showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+                  title: Text('Error'),
+                  content: Container(
+                    height: 300,
+                    width: 300,
+                    child: ListView(
+                      children: [
+                        Text(result),
+                        SizedBox(height: 15),
+                        Text(
+                          'You can retry the same search or you may need to cancel and try a different search.',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    ElevatedButton(
+                      child: Text("Retry"),
+                      onPressed: () {
+                        _refreshController.requestRefresh();
+                        Navigator.pop(context);
+                        return;
+                      },
+                    ),
+                    ElevatedButton(
+                      child: Text("Cancel"),
+                      onPressed: () {
+                        dataPack = dataPackStable.clone();
+                        setState(() {
+                          _refreshController.refreshCompleted();
+                          _refreshController.headerStatus;
+                        });
+                        Navigator.pop(context);
+                        return;
+                      },
+                    ),
                   ],
                 ));
       }
@@ -235,15 +259,16 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> _refreshWithKeys() async {
-    await _fillKeys();
-    _refreshController.requestRefresh();
-  }
+  Future<void> _refreshWithKeys() async {}
 
   @override
   void initState() {
     super.initState();
     _refreshWithKeys();
+    SchedulerBinding.instance!.addPostFrameCallback((_) async {
+      await _fillKeys();
+      _refreshController.requestRefresh();
+    });
   }
 
   @override
@@ -451,7 +476,7 @@ class InfoPackage {
   }
 
   Future<String> refresh() async {
-    // 2 is ask for new team // 0 is success // all other string is a failure message
+    // 2 is ask for new team // 0 is success // a map of 3 (int) and string message is notify of auto-correct year // all other string is a failure message
     try {
       await getDistrictKey();
       await getTeamAbout();
@@ -465,11 +490,15 @@ class InfoPackage {
       return e.message;
     } catch (e) {
       if (e is String) {
-        return e;
-      } else if (e is int && e == 2) {
+        return '4$e';
+      }
+      if (e is int && e == 2) {
         return '2';
       }
-      return 'Unknown Error\n' + e.toString();
+      if (e is Set && e.first == 3) {
+        return '3${e.elementAt(1)}';
+      }
+      return '4Unknown Error\n' + e.toString();
     }
     return '0';
   }
@@ -520,8 +549,6 @@ class InfoPackage {
           .getDistrictApi()
           .getTeamDistricts(teamKey: 'frc$team');
       if (response.data!.isNotEmpty) {
-        int lastDistrictYear = response.data!.last.year;
-        String lastDistrict = response.data!.last.key;
         yearsRanked.clear();
         bool done = false;
         for (var element in response.data!) {
@@ -533,27 +560,30 @@ class InfoPackage {
         }
         if (!done) {
           int failedYear = year;
-          year = lastDistrictYear;
-          district = lastDistrict;
-          _addKeys();
-          throw 'Team $team may not have competed in $failedYear. Redirecting to $year.';
+          year = response.data!.last.year;
+          district = response.data!.last.key;
+          yearsRanked.remove(year);
+          throw {
+            3,
+            'Team $team may not have competed in $failedYear. Redirecting to $year.'
+          };
         }
       } else
         throw 2;
     } on DioError catch (e) {
       if (e.response == null)
         throw 'Cannot connect to server.  Check your internet connection!';
-      if (e.response!.statusCode != null && e.response!.statusCode == 404) {
-        if (e.response.toString().contains('does not exist'))
-          throw 2; // Choose team, team doesnt exist
-      }
+      if (e.response!.statusCode != null &&
+          e.response!.statusCode == 404 &&
+          e.response.toString().contains('does not exist'))
+        throw 2; // Choose team, team doesnt exist
       throw e.message;
     } catch (e) {
-      if (e.toString().contains('may not have')) {
-        throw e.toString();
+      if (e is Set && e.first is int && e.first == 3) {
+        throw e;
       }
       if (e is int) throw 2;
-      throw "Unknown Error\n" + e.toString();
+      throw "4Unknown Error\n" + e.toString();
     }
   }
 
@@ -666,14 +696,16 @@ class InfoPackage {
   Center createAwards() {
     String awardText = '';
     awards.forEach((element) {
-      awardText += "${element.name} -- Event: ${element.eventKey}\n\n";
+      awardText += "\n\n\n${element.name} -- Event: ${element.eventKey}\n";
       if (element.recipientList.isNotEmpty) {
         awardText += '\nGiven to: ';
         element.recipientList.forEach((element) {
-          awardText += "${element.awardee} (${element.teamKey})  ";
+          awardText += "${element.awardee ?? ''} (${element.teamKey ?? ''})  ";
         });
       }
     });
+    if (awardText.isEmpty)
+      awardText = 'This team did not win any awards that year.';
     return Center(
       child: Text(
         awardText,
@@ -712,7 +744,7 @@ class InfoPackage {
     return Center(
       child: Text(
         'Team $team does not or has not competed in $year!',
-        style: TextStyle(color: Colors.teal),
+        style: TextStyle(color: Colors.blueGrey),
       ),
     );
   }
