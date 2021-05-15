@@ -25,7 +25,7 @@ dependencies:
     sdk: flutter
   tba_api_dart_dio_client:
     git: https://github.com/jr1221/tba_api_dart_dio_client
-  pull_to_refresh: 1.6.4-nullsafety.0
+  pull_to_refresh:
   connectivity:
   flutter_linkify:
   url_launcher:
@@ -33,10 +33,7 @@ dependencies:
   shared_preferences:
   confetti: ^0.6.0-nullsafety
   email_validator:
-  appwrite:
-    git:
-      url: https://github.com/appwrite/sdk-for-flutter.git
-      ref: feat-null-safety-new
+  appwrite: ^0.5.0-dev.1
   loading_overlay:
   encrypt:
 

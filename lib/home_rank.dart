@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:expandable/expandable.dart';
@@ -13,6 +12,8 @@ import 'package:confetti/confetti.dart';
 import 'package:dio/dio.dart';
 
 import 'ApiMgr.dart';
+import 'appwrite.dart';
+import 'constants.dart';
 import 'districtCap.dart';
 
 class HomePage extends StatefulWidget {
@@ -155,7 +156,6 @@ class _HomePageState extends State<HomePage> {
     final String result = await dataPack.refresh();
 
     if (result != '0') {
-      print(result);
       setState(() {
         _refreshController.refreshFailed();
         _refreshController.headerStatus;
@@ -204,7 +204,7 @@ class _HomePageState extends State<HomePage> {
                     width: 300,
                     child: ListView(
                       children: [
-                        Text(result),
+                        Text(result.substring(1)),
                         SizedBox(height: 15),
                         Text(
                           'You can retry the same search or you may need to cancel and try a different search.',
@@ -250,26 +250,26 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _fillKeys() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? team = prefs.getInt('team');
-    int? year = prefs.getInt('year');
-    if (team != null && year != null) {
-      dataPack.team = team;
-      dataPack.year = year;
+    if (ManageAppwrite.loggedIn) {
+      dataPack.team = int.tryParse(await ManageAppwrite.getPrefs(
+          key: Constants.prefCurrentTeam)) ?? dataPack.team; //TODO honestly
+    } else {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      int? team = prefs.getInt('team');
+      int? year = prefs.getInt('year');
+      if (team != null && year != null) {
+        dataPack.team = team;
+        dataPack.year = year;
+      }
     }
+    _refreshController.requestRefresh();
   }
-
-  Future<void> _refreshWithKeys() async {}
 
   @override
   void initState() {
     super.initState();
-    _refreshWithKeys();
-    SchedulerBinding.instance!.addPostFrameCallback((_) async {
-      await _fillKeys();
-      _refreshController.requestRefresh();
-    });
-  }
+    WidgetsBinding.instance!.addPostFrameCallback((_) => _fillKeys());
+    }
 
   @override
   void dispose() {
@@ -486,6 +486,7 @@ class InfoPackage {
       await getDistrictRankings();
       format();
       _addKeys();
+      if (ManageAppwrite.loggedIn) ManageAppwrite.updatePrefs(prefs: {Constants.prefCurrentTeam : team.toString()});
     } on DioError catch (e) {
       return e.message;
     } catch (e) {
@@ -583,7 +584,7 @@ class InfoPackage {
         throw e;
       }
       if (e is int) throw 2;
-      throw "4Unknown Error\n" + e.toString();
+      throw "Unknown Error\n" + e.toString();
     }
   }
 
@@ -705,7 +706,7 @@ class InfoPackage {
       }
     });
     if (awardText.isEmpty)
-      awardText = 'This team did not win any awards that year.';
+      awardText = 'This team did not win any awards in $year.';
     return Center(
       child: Text(
         awardText,
