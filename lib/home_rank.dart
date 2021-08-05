@@ -12,8 +12,6 @@ import 'package:confetti/confetti.dart';
 import 'package:dio/dio.dart';
 
 import 'ApiMgr.dart';
-import 'appwrite.dart';
-import 'constants.dart';
 import 'districtCap.dart';
 
 class HomePage extends StatefulWidget {
@@ -250,10 +248,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _fillKeys() async {
-    if (ManageAppwrite.loggedIn) {
-      dataPack.team = int.tryParse(await ManageAppwrite.getPrefs(
-          key: Constants.prefCurrentTeam)) ?? dataPack.team; //TODO honestly
-    } else {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       int? team = prefs.getInt('team');
       int? year = prefs.getInt('year');
@@ -261,7 +255,6 @@ class _HomePageState extends State<HomePage> {
         dataPack.team = team;
         dataPack.year = year;
       }
-    }
     _refreshController.requestRefresh();
   }
 
@@ -486,7 +479,6 @@ class InfoPackage {
       await getDistrictRankings();
       format();
       _addKeys();
-      if (ManageAppwrite.loggedIn) ManageAppwrite.updatePrefs(prefs: {Constants.prefCurrentTeam : team.toString()});
     } on DioError catch (e) {
       return e.message;
     } catch (e) {

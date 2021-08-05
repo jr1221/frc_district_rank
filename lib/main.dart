@@ -1,43 +1,20 @@
-import 'package:encrypt/encrypt.dart';
 import 'package:flutter/material.dart';
-import 'package:frc_district_rank/appwrite.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'ApiMgr.dart';
-import 'account.dart';
 import 'home_rank.dart';
-import 'login.dart';
-import 'constants.dart';
 
 void main() {
   ApiMgr.init();
   runApp(MyApp());
-  ManageAppwrite.initAppwrite();
-  autoLogin();
 }
 
-Future<void> autoLogin() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  final email = prefs.get('email');
-  final password = prefs.get('password');
-  if (email != null && password != null) {
-    final String decryptedPass = Constants.encrypter
-        .decrypt(Encrypted.fromBase64(password.toString()), iv: Constants.iv);
-    await ManageAppwrite.createSession(
-        email: email.toString(), password: decryptedPass);
-  }
-}
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       initialRoute: '/',
-      routes: {
-        '/account': (context) => AccountInfo(),
-        '/login': (context) => ShowLogin(),
-      },
       title: '',
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
@@ -73,16 +50,6 @@ class _MainPageState extends State<MainPage> {
     AppBar appBar = AppBar(
       title: Text('FRC District Ranking'),
       centerTitle: true,
-      actions: [
-        IconButton(
-            onPressed: () {
-              if (ManageAppwrite.loggedIn)
-                Navigator.pushNamed(context, '/account');
-              else
-                Navigator.pushNamed(context, '/login');
-            },
-            icon: const Icon(Icons.login)),
-      ],
     );
     return Scaffold(
       appBar: appBar,
