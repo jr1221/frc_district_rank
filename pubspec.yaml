@@ -28,9 +28,12 @@ dependencies:
   flutter_linkify:
   url_launcher:
   expandable:
-  shared_preferences:
   flutter_riverpod: ^1.0.0-dev.6
-
+  workmanager: ^0.4.1
+  flutter_local_notifications: ^8.1.1
+  settings_ui: ^1.0.0
+  get_storage:
+  flutter_phoenix: ^1.0.0
 
 
 

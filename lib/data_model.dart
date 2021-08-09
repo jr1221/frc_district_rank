@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:tba_api_dart_dio_client/tba_api_dart_dio_client.dart';
 import 'package:dio/dio.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -18,9 +18,8 @@ Future<void> onOpen(LinkableElement link) async {
 }
 
 Future<List<int>> _getKeys() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  int? team = prefs.getInt('team');
-  int? year = prefs.getInt('year');
+  int? team = GetStorage().read('team');
+  int? year = GetStorage().read('year');
   if (team != null && year != null) {
     return [team, year];
   } else {
@@ -28,10 +27,14 @@ Future<List<int>> _getKeys() async {
   }
 }
 
+Future<void> _init() async {
+  ApiMgr.init();
+  await GetStorage().initStorage;
+}
+
 Future<void> _fillKeys(int team, int year) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  prefs.setInt('team', team);
-  prefs.setInt('year', year);
+  GetStorage().write('team', team);
+  GetStorage().write('year', year);
 }
 
 final teamProv = StateProvider<int>((_) => -1);
@@ -45,6 +48,7 @@ final dataProv = FutureProvider.autoDispose<DataModel>((ref) async {
   int year = ref.read(yearProv).state;
 
   if (team == -1 || year == -1) {
+    await _init();
     await _getKeys().then((value) {
       team = (team != -1)
           ? team
