@@ -42,6 +42,6 @@ class DistrictCap {
   }
 
   String prettyCapacity() {
-    return "Capacity: $capacity";
+    return 'Capacity: $capacity';
   }
 }
