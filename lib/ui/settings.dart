@@ -1,9 +1,12 @@
+import 'package:bot_toast/bot_toast.dart';
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:settings_ui/settings_ui.dart';
 
+import '../cache_manager.dart';
 import '../constants.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -11,16 +14,16 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<Box<String>>(
-        valueListenable:
-            Hive.box<String>(ProjectConstants.settingsBoxKey).listenable(),
-        builder: (context, box, widget) {
-          return Scaffold(
-              appBar: AppBar(
-                title: const Text('Settings'),
-                centerTitle: true,
-              ),
-              body: SettingsList(
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('Settings'),
+          centerTitle: true,
+        ),
+        body: ValueListenableBuilder<Box<String>>(
+            valueListenable:
+                Hive.box<String>(ProjectConstants.settingsBoxKey).listenable(),
+            builder: (context, box, widget) {
+              return SettingsList(
                 sections: [
                   SettingsSection(
                     title: const Text('General'),
@@ -35,8 +38,8 @@ class SettingsScreen extends StatelessWidget {
                               box.put(
                                   ProjectConstants.darkModeStorageKey,
                                   ((SchedulerBinding.instance.window
-                                              .platformBrightness ==
-                                          Brightness.dark)
+                                      .platformBrightness ==
+                                      Brightness.dark)
                                       .toString()));
                             }
                           },
@@ -49,12 +52,12 @@ class SettingsScreen extends StatelessWidget {
                                 value.toString());
                           },
                           initialValue:
-                              box.get(ProjectConstants.darkModeStorageKey) ==
-                                  'true',
+                          box.get(ProjectConstants.darkModeStorageKey) ==
+                              'true',
                         )
                     ],
                   ),
-                  /*     SettingsSection(
+                  /*       SettingsSection(
                     title: const Text('Notifications'),
                     tiles: [
                       SettingsTile(
@@ -68,6 +71,38 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ],
                   ), */
+                  SettingsSection(
+                    title: const Text('Advanced'),
+                    tiles: <SettingsTile>[
+                      SettingsTile(
+                        title: const Text('Clear cache'),
+                        onPressed: (context) async {
+                          try {
+                            await (await Hive.openLazyBox<CacheResponse>(
+                                    CacheManager.hiveCacheStore!.hiveBoxName))
+                                .clear();
+                            BotToast.showText(
+                                text: 'Successfully cleared cache!');
+                          } catch (e) {
+                            BotToast.showText(text: 'Error: $e');
+                          }
+                        },
+                      ),
+                      SettingsTile(
+                          title: const Text('Clear preferences'),
+                          onPressed: (context) async {
+                            try {
+                              await Hive.box<String>(
+                                      ProjectConstants.settingsBoxKey)
+                                  .clear();
+                              BotToast.showText(
+                                  text: 'Successfully cleared preferences!');
+                            } catch (e) {
+                              BotToast.showText(text: 'Error: $e');
+                            }
+                          })
+                    ],
+                  ),
                   CustomSettingsSection(
                     child: Column(
                       children: const [
@@ -81,8 +116,8 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
                 ],
-              ));
-        });
+              );
+            }));
   }
 }
 

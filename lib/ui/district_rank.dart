@@ -1,9 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
-import 'package:dio_cache_interceptor_hive_store/dio_cache_interceptor_hive_store.dart';
 import 'package:expandable/expandable.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
@@ -11,6 +9,7 @@ import 'package:hive/hive.dart';
 import 'package:tba_api_dart_dio_client/tba_api_dart_dio_client.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import '../cache_manager.dart';
 import '../constants.dart';
 import '../cubits/district_rank_cubit.dart';
 import '../district_cap.dart';
@@ -31,23 +30,15 @@ class DistrictRankScreen extends StatelessWidget {
               ProjectConstants.lastYearStorageKey,
               defaultValue: ProjectConstants.defaultYear.toString())!);
 
-          String? tempDir;
-          if (kIsWeb) {
-            tempDir = null;
-          } else {
-            tempDir = settings.get(ProjectConstants.tempDirStorageKey,
-                defaultValue: './');
-          }
-
           final api = TbaApiDartDioClient()
             ..dio.interceptors.add(DioCacheInterceptor(
                     options: CacheOptions(
-                  policy: CachePolicy.request,
+                      policy: CachePolicy.request,
                   hitCacheOnErrorExcept: [401, 403, 404],
                   priority: CachePriority.normal,
                   store: BackupCacheStore(
                       primary: MemCacheStore(),
-                      secondary: HiveCacheStore(tempDir)),
+                      secondary: CacheManager.hiveCacheStore!),
                 )))
             ..setApiKey('apiKey',
                 'KMpingB75hZd8noCRQew4L8ZFEGikoSCGVfZx2x2i4BeL3pVs5C3L9llrEGIvuoB');

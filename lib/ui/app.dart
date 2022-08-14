@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:frc_district_rank/ui/settings.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
               '/': (context) => const DistrictRankScreen(),
               '/settings': (context) => const SettingsScreen(),
             },
+            builder: BotToastInit(),
             theme: ThemeData.from(
                 colorScheme: ColorScheme.fromSeed(
                     seedColor: Colors.blueGrey, brightness: Brightness.light)),
