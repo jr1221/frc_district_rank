@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frc_district_rank/constants.dart';
 import 'package:hive/hive.dart';

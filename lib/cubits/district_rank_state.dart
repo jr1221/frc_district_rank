@@ -2,7 +2,7 @@ part of 'district_rank_cubit.dart';
 
 enum DistrictRankStatus { initial, loading, success, failure }
 
-class DistrictRankState extends Equatable {
+class DistrictRankState {
   final DistrictRankStatus status;
   final int year;
   final int team;
@@ -15,9 +15,6 @@ class DistrictRankState extends Equatable {
       this.team = 1,
       this.districtRankModel,
       this.exception});
-
-  @override
-  List<Object?> get props => [status, year, team, exception];
 
   DistrictRankState copyWith(
       {DistrictRankStatus? status,

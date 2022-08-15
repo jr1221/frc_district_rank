@@ -6,8 +6,8 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:settings_ui/settings_ui.dart';
 
-import '../cache_manager.dart';
-import '../constants.dart';
+import '../../cache_manager.dart';
+import '../../constants.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -20,6 +20,7 @@ class SettingsScreen extends StatelessWidget {
           centerTitle: true,
         ),
         body: ValueListenableBuilder<Box<String>>(
+          // listen to changes in all settings
             valueListenable:
                 Hive.box<String>(ProjectConstants.settingsBoxKey).listenable(),
             builder: (context, box, widget) {
@@ -29,12 +30,16 @@ class SettingsScreen extends StatelessWidget {
                     title: const Text('General'),
                     tiles: <SettingsTile>[
                       SettingsTile.switchTile(
+                          title: const Text('Use System Dark Mode'),
+                          // true if no preference set in settings
                           initialValue: !box
                               .containsKey(ProjectConstants.darkModeStorageKey),
                           onToggle: (bool value) {
                             if (value) {
+                              // remove preference from hive
                               box.delete(ProjectConstants.darkModeStorageKey);
                             } else {
+                              // put current platform mode into hive darkMode
                               box.put(
                                   ProjectConstants.darkModeStorageKey,
                                   ((SchedulerBinding.instance.window
@@ -42,22 +47,25 @@ class SettingsScreen extends StatelessWidget {
                                           Brightness.dark)
                                       .toString()));
                             }
-                          },
-                          title: const Text('Use System Theme')),
+                          }),
+                      // if user preference set, show dark theme switch
                       if (box.containsKey(ProjectConstants.darkModeStorageKey))
                         SettingsTile.switchTile(
-                          title: const Text('Use Dark Theme'),
-                          onToggle: (bool value) {
-                            box.put(ProjectConstants.darkModeStorageKey,
-                                value.toString());
-                          },
+                          title: const Text('Use Dark Mode'),
+                          // current theme preference
                           initialValue:
                               box.get(ProjectConstants.darkModeStorageKey) ==
                                   'true',
+                          onToggle: (bool value) {
+                            // put preference into hive darkMode
+                            box.put(ProjectConstants.darkModeStorageKey,
+                                value.toString());
+                          },
                         ),
                       SettingsTile.navigation(
                         title: const Text('Color Theme'),
-                        description: const Text('Change the color theme'),
+                        description: const Text('Change the color theming'),
+                        // current colorScheme for theme in hive
                         trailing: Icon(Icons.square_rounded,
                             color: Color(int.parse(box.get(
                                 ProjectConstants.colorSchemeStorageKey,

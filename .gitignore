@@ -72,6 +72,9 @@
 # Service account files
 svc-keyfile.json
 
+# Api key file
+lib/api_key.dart
+
 # Lockfiles
 Podfile.lock
 pubspec.lock

@@ -5,6 +5,7 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:frc_district_rank/api_key.dart';
 import 'package:hive/hive.dart';
 import 'package:tba_api_dart_dio_client/tba_api_dart_dio_client.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -21,12 +22,12 @@ class DistrictRankScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-        create: (_) {
+        create: (context) {
           final settings = Hive.box<String>(ProjectConstants.settingsBoxKey);
-          int startTeam = int.parse(settings.get(
+          int prevLaunchTeam = int.parse(settings.get(
               ProjectConstants.lastTeamStorageKey,
               defaultValue: ProjectConstants.defaultTeam.toString())!);
-          int startYear = int.parse(settings.get(
+          int prevLaunchYear = int.parse(settings.get(
               ProjectConstants.lastYearStorageKey,
               defaultValue: ProjectConstants.defaultYear.toString())!);
 
@@ -35,17 +36,18 @@ class DistrictRankScreen extends StatelessWidget {
                     options: CacheOptions(
                   policy: CachePolicy.request,
                   hitCacheOnErrorExcept: [401, 403, 404],
-                  priority: CachePriority.normal,
+                  // on not found, show errer, then use cubit to restore previous state
                   store: BackupCacheStore(
                       primary: MemCacheStore(),
-                      secondary: CacheManager.hiveCacheStore!),
+                      secondary: CacheManager
+                          .hiveCacheStore!), // needs CacheManager.init()
                 )))
             ..setApiKey('apiKey',
-                'KMpingB75hZd8noCRQew4L8ZFEGikoSCGVfZx2x2i4BeL3pVs5C3L9llrEGIvuoB');
+                apiKey); // from lib/api_key.dart, variable const apiKey = 'XXXXX'; <-- TBA api key from account settings
 
           return DistrictRankCubit(
-              districtRankRepository: DistrictRankRepository(api: api))
-            ..fetchData(startTeam, startYear);
+              districtRankRepository: DistrictRankRepository(tbaApi: api))
+            ..fetchData(prevLaunchTeam, prevLaunchYear);
         },
         child: Scaffold(
           appBar: AppBar(

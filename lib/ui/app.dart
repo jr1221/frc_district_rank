@@ -1,8 +1,8 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:frc_district_rank/ui/settings.dart';
-import 'package:frc_district_rank/ui/theme_selection.dart';
+import 'package:frc_district_rank/ui/settings/settings.dart';
+import 'package:frc_district_rank/ui/settings/theme_selection.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 
@@ -15,29 +15,38 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Box<String>>(
-        valueListenable: Hive.box<String>(ProjectConstants.settingsBoxKey)
+        valueListenable: Hive.box<String>(ProjectConstants
+                .settingsBoxKey) // Listen to darkMode and colorScheme hive changes
             .listenable(keys: [
           ProjectConstants.darkModeStorageKey,
           ProjectConstants.colorSchemeStorageKey
         ]),
         builder: (context, box, widget) {
           bool? darkMode;
-          switch (box.get('darkMode', defaultValue: 'unset')) {
-            case 'true':
+          switch (box.get(ProjectConstants.darkModeStorageKey,
+              defaultValue: 'unset')) {
+            case 'true': // darkMode ON
               darkMode = true;
               break;
-            case 'false':
+            case 'false': // darkMode OFF
               darkMode = false;
               break;
-            case 'unset':
+            case 'unset': // darkMode platform preference
               darkMode = null;
               break;
-            default:
+            default: // Shouldn't reach
               throw UnimplementedError(
                   'Didn\'t find parsable type for dark mode!');
           }
 
-          final accentColor = Color(int.parse(box.get(
+          // If no colorScheme in hive, put blueGrey as default
+          if (box.get(ProjectConstants.colorSchemeStorageKey) == null) {
+            box.put(ProjectConstants.colorSchemeStorageKey,
+                Colors.blueGrey.value.toString());
+          }
+
+          // get colorScheme color from hive, default to blueGrey (shouldn't need)
+          final colorSchemeColor = Color(int.parse(box.get(
               ProjectConstants.colorSchemeStorageKey,
               defaultValue: Colors.blueGrey.value.toString())!));
 
@@ -52,10 +61,11 @@ class MyApp extends StatelessWidget {
             builder: BotToastInit(),
             theme: ThemeData.from(
                 colorScheme: ColorScheme.fromSeed(
-                    seedColor: accentColor, brightness: Brightness.light)),
+                    seedColor: colorSchemeColor, brightness: Brightness.light)),
             darkTheme: ThemeData.from(
                 colorScheme: ColorScheme.fromSeed(
-                    seedColor: accentColor, brightness: Brightness.dark)),
+                    seedColor: colorSchemeColor, brightness: Brightness.dark)),
+            // darkMode ON or OFF if manually set, else use platform mode
             themeMode: (darkMode ??
                     SchedulerBinding.instance.window.platformBrightness ==
                         Brightness.dark)

@@ -4,9 +4,9 @@ import 'package:tba_api_dart_dio_client/tba_api_dart_dio_client.dart';
 import '../model/district_rank_model.dart';
 
 class DistrictRankRepository {
-  final TbaApiDartDioClient api;
+  final TbaApiDartDioClient tbaApi;
 
-  DistrictRankRepository({required this.api});
+  DistrictRankRepository({required this.tbaApi});
 
   Future<DistrictRankModel> fetchModel(int team, int year) async {
     List<DistrictList> districtList;
@@ -79,26 +79,26 @@ class DistrictRankRepository {
 
   Future<List<DistrictList>> _fetchDistrictKey(int team) async {
     final response =
-        await api.getDistrictApi().getTeamDistricts(teamKey: 'frc$team');
+        await tbaApi.getDistrictApi().getTeamDistricts(teamKey: 'frc$team');
     return response.data!.toList();
   }
 
   Future<Team> _fetchTeamAbout(int team) async {
-    final response = await api.getTeamApi().getTeam(
+    final response = await tbaApi.getTeamApi().getTeam(
           teamKey: 'frc$team',
         );
     return response.data!;
   }
 
   Future<List<Award>> _fetchTeamAwards(int team, int year) async {
-    final response = await api
+    final response = await tbaApi
         .getTeamApi()
         .getTeamAwardsByYear(teamKey: 'frc$team', year: year);
     return response.data!.asList();
   }
 
   Future<List<Media>> _fetchTeamAvatar(int team, int year) async {
-    final response = await api
+    final response = await tbaApi
         .getTeamApi()
         .getTeamMediaByYear(teamKey: 'frc$team', year: year);
     return response.data!.toList();
@@ -106,7 +106,7 @@ class DistrictRankRepository {
 
   Future<List<DistrictRanking>> _fetchDistrictRankings(
       String districtKey) async {
-    final response = await api
+    final response = await tbaApi
         .getDistrictApi()
         .getDistrictRankings(districtKey: districtKey);
     return response.data!.toList();
