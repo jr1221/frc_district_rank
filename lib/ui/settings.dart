@@ -38,8 +38,8 @@ class SettingsScreen extends StatelessWidget {
                               box.put(
                                   ProjectConstants.darkModeStorageKey,
                                   ((SchedulerBinding.instance.window
-                                      .platformBrightness ==
-                                      Brightness.dark)
+                                              .platformBrightness ==
+                                          Brightness.dark)
                                       .toString()));
                             }
                           },
@@ -52,9 +52,21 @@ class SettingsScreen extends StatelessWidget {
                                 value.toString());
                           },
                           initialValue:
-                          box.get(ProjectConstants.darkModeStorageKey) ==
-                              'true',
-                        )
+                              box.get(ProjectConstants.darkModeStorageKey) ==
+                                  'true',
+                        ),
+                      SettingsTile.navigation(
+                        title: const Text('Color Theme'),
+                        description: const Text('Change the color theme'),
+                        trailing: Icon(Icons.square_rounded,
+                            color: Color(int.parse(box.get(
+                                ProjectConstants.colorSchemeStorageKey,
+                                defaultValue:
+                                    Colors.blueGrey.value.toString())!))),
+                        onPressed: (context) {
+                          Navigator.pushNamed(context, '/settings/theme');
+                        },
+                      )
                     ],
                   ),
                   /*       SettingsSection(
@@ -110,7 +122,7 @@ class SettingsScreen extends StatelessWidget {
                           height: 16,
                         ),
                         Text(
-                          'Version: 2.0.0',
+                          'Version: 1.1.0',
                         ),
                       ],
                     ),

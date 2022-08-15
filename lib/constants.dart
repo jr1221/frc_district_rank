@@ -13,6 +13,8 @@ class ProjectConstants {
   static const String lastTeamStorageKey = 'lastTeam'; // int
   static const String lastYearStorageKey = 'lastYear'; // int
 
+  static const String colorSchemeStorageKey = 'colorScheme';
+
   static const String tempDirFolderAppend = '/frc_district_rankHIVE';
 
   static const avatarW = 40;

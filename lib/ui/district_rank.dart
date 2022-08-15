@@ -33,7 +33,7 @@ class DistrictRankScreen extends StatelessWidget {
           final api = TbaApiDartDioClient()
             ..dio.interceptors.add(DioCacheInterceptor(
                     options: CacheOptions(
-                      policy: CachePolicy.request,
+                  policy: CachePolicy.request,
                   hitCacheOnErrorExcept: [401, 403, 404],
                   priority: CachePriority.normal,
                   store: BackupCacheStore(
@@ -77,8 +77,8 @@ class DistrictRankScreen extends StatelessWidget {
                       throw 'Could not launch $link';
                     }
                   },
-                  linkStyle: const TextStyle(
-                    color: Colors.blueAccent,
+                  linkStyle: TextStyle(
+                    color: Theme.of(context).toggleableActiveColor,
                     decoration: TextDecoration.underline,
                   ),
                 ),

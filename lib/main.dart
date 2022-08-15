@@ -9,7 +9,9 @@ import 'constants.dart';
 
 void main() async {
   await Hive.initFlutter();
-  await Hive.openBox<String>(ProjectConstants.settingsBoxKey);
+  final box = await Hive.openBox<String>(ProjectConstants.settingsBoxKey);
+  box.put(ProjectConstants.colorSchemeStorageKey,
+      Colors.redAccent.value.toString());
   if (!kIsWeb) {
     CacheManager.init(
         '${(await getTemporaryDirectory()).path}${ProjectConstants.tempDirFolderAppend}');
