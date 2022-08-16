@@ -27,13 +27,15 @@ class DistrictRankModel {
     String aboutText = '';
     aboutText += teamObj.nickname!;
     aboutText += '\n\n${teamObj.name}';
-    aboutText += '\n\n${teamObj.website}';
     aboutText += '\n\nRookie year: ${teamObj.rookieYear}';
     aboutText += '\n\n${teamObj.schoolName}';
     aboutText +=
         '\n${teamObj.city}, ${teamObj.stateProv}, ${teamObj.country} ${teamObj.postalCode}';
     return aboutText;
   }
+
+  String? get teamWebsite =>
+      teamObj.website?.replaceFirst('http://', 'https://');
 
   /*
   Uses - awards, team

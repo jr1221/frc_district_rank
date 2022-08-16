@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bot_toast/bot_toast.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:frc_district_rank/api_key.dart';
 import 'package:hive/hive.dart';
 import 'package:tba_api_dart_dio_client/tba_api_dart_dio_client.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../cache_manager.dart';
@@ -73,8 +75,10 @@ class DistrictRankScreen extends StatelessWidget {
                         'The Blue Alliance', 'https://thebluealliance.com'),
                   ],
                   onOpen: (link) async {
-                    if (await canLaunchUrlString(link.url)) {
-                      await launchUrlString(link.url);
+                    final url = Uri.parse(link.url);
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(url,
+                          mode: LaunchMode.externalApplication);
                     } else {
                       throw 'Could not launch $link';
                     }
@@ -153,29 +157,54 @@ class DistrictRankHome extends StatelessWidget {
         case DistrictRankStatus.success:
         case DistrictRankStatus.failure:
           if (state.districtRankModel != null) {
-            return ExpandableTheme(
-              data: ExpandableThemeData(
-                iconColor: Theme.of(context).colorScheme.inverseSurface,
-              ),
-              child: RefreshIndicator(
-                onRefresh: () {
-                  return context
-                      .read<DistrictRankCubit>()
-                      .fetchData(state.team, state.year);
-                },
+            return RefreshIndicator(
+              onRefresh: () {
+                return context
+                    .read<DistrictRankCubit>()
+                    .fetchData(state.team, state.year);
+              },
+              child: ExpandableTheme(
+                data: ExpandableThemeData(
+                  iconColor: Theme.of(context).colorScheme.inverseSurface,
+                ),
                 child: ListView(
+                  padding: EdgeInsets.zero,
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: <Widget>[
-                    const SizedBox(
-                      height: 5,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        const Text('View more info on The Blue Alliance',
+                            style: TextStyle(fontSize: 12),
+                            textAlign: TextAlign.center),
+                        IconButton(
+                            constraints: const BoxConstraints(),
+                            padding: EdgeInsets.zero,
+                            onPressed: () async {
+                              final url = Uri.parse(
+                                  'https://www.thebluealliance.com/team/${state.team}/${state.year}');
+                              if (await canLaunchUrl(url)) {
+                                launchUrl(url,
+                                    mode: LaunchMode.externalApplication);
+                              } else {
+                                BotToast.showText(
+                                    text: 'Failed to launch ${url.toString()}');
+                              }
+                            },
+                            icon: const Icon(
+                              Icons.open_in_new_outlined,
+                              size: 16.0,
+                            ))
+                      ],
                     ),
+                    const SizedBox(height: 5.0),
                     if (state.districtRankModel!.baseAvatar.isNotEmpty)
                       Image(
                         image: MemoryImage(
                             base64Decode(state.districtRankModel!.baseAvatar),
                             scale: 0.75),
                         alignment: Alignment.topCenter,
-                        fit: BoxFit.scaleDown,
+                        fit: BoxFit.none,
                         width: ProjectConstants.avatarW.toDouble(),
                         height: ProjectConstants.avatarH.toDouble(),
                       ),
@@ -189,27 +218,27 @@ class DistrictRankHome extends StatelessWidget {
                               )),
                           TextSpan(
                               text:
-                                  '${state.districtRankModel!.districtRankPretty}\n',
+                              '${state.districtRankModel!.districtRankPretty}\n',
                               style: TextStyle(
                                 fontSize: (state.districtRankModel!
-                                            .districtRankPretty.length ==
-                                        3)
+                                    .districtRankPretty.length ==
+                                    3)
                                     ? 80
                                     : (state.districtRankModel!
-                                                .districtRankPretty.length ==
-                                            4)
-                                        ? 56
-                                        : (state
-                                                    .districtRankModel!
-                                                    .districtRankPretty
-                                                    .length ==
-                                                5)
-                                            ? 50
-                                            : 58,
+                                    .districtRankPretty.length ==
+                                    4)
+                                    ? 56
+                                    : (state
+                                    .districtRankModel!
+                                    .districtRankPretty
+                                    .length ==
+                                    5)
+                                    ? 50
+                                    : 58,
                               )),
                           TextSpan(
                             text:
-                                '${state.districtRankModel!.districtPretty}\n',
+                            '${state.districtRankModel!.districtPretty}\n',
                             style: const TextStyle(
                               fontSize: 22,
                             ),
@@ -217,8 +246,8 @@ class DistrictRankHome extends StatelessWidget {
                           if (state.year == 2019)
                             TextSpan(
                               text: DistrictCap(
-                                      districtKey:
-                                          state.districtRankModel!.districtKey)
+                                  districtKey:
+                                  state.districtRankModel!.districtKey)
                                   .prettyCapacity(),
                               style: const TextStyle(
                                 fontSize: 22,
@@ -227,7 +256,6 @@ class DistrictRankHome extends StatelessWidget {
                         ],
                       ),
                       textAlign: TextAlign.center,
-                      style: DefaultTextStyle.of(context).style,
                     ),
                     const SizedBox(
                       height: 30.0,
@@ -296,10 +324,10 @@ class DistrictRankHome extends StatelessWidget {
                                                 TextFormField(
                                                   autofocus: true,
                                                   keyboardType:
-                                                      TextInputType.number,
+                                                  TextInputType.number,
                                                   textAlign: TextAlign.center,
                                                   controller:
-                                                      _teamSelectTextController,
+                                                  _teamSelectTextController,
                                                   validator: (value) {
                                                     if (value == null ||
                                                         value.isEmpty ||
@@ -318,17 +346,17 @@ class DistrictRankHome extends StatelessWidget {
                                                               .text);
                                                       context
                                                           .read<
-                                                              DistrictRankCubit>()
+                                                          DistrictRankCubit>()
                                                           .fetchData(
-                                                              team, state.year);
+                                                          team, state.year);
                                                       Navigator.pop(context);
                                                       return;
                                                     }
                                                   },
                                                   decoration:
-                                                      const InputDecoration(
+                                                  const InputDecoration(
                                                     hintText:
-                                                        'Team # from last 7 years',
+                                                    'Team # from last 7 years',
                                                   ),
                                                 ),
                                               ],
@@ -342,7 +370,7 @@ class DistrictRankHome extends StatelessWidget {
                                       actions: <Widget>[
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                          MainAxisAlignment.center,
                                           children: [
                                             Expanded(
                                               flex: 2,
@@ -356,9 +384,9 @@ class DistrictRankHome extends StatelessWidget {
                                                             .text);
                                                     context
                                                         .read<
-                                                            DistrictRankCubit>()
+                                                        DistrictRankCubit>()
                                                         .fetchData(
-                                                            team, state.year);
+                                                        team, state.year);
                                                     Navigator.pop(context);
                                                     return;
                                                   }
@@ -377,23 +405,45 @@ class DistrictRankHome extends StatelessWidget {
                     Container(
                       // expander about
                       padding:
-                          const EdgeInsets.only(left: 16, right: 16, top: 20),
+                      const EdgeInsets.only(left: 16, right: 16, top: 20),
                       child: ExpandablePanel(
-                        header: Text(
-                          'About Team ${state.team}',
-                          style: const TextStyle(fontSize: 20),
+                        header: Row(
+                          children: [
+                            Text('About Team ${state.team}',
+                                style: const TextStyle(fontSize: 20)),
+                            IconButton(
+                                onPressed: () async {
+                                  if (state.districtRankModel!.teamWebsite !=
+                                      null) {
+                                    try {
+                                      final url = Uri.parse(state
+                                          .districtRankModel!.teamWebsite!);
+                                      if (await canLaunchUrl(url)) {
+                                        launchUrl(url,
+                                            mode:
+                                                LaunchMode.externalApplication);
+                                      } else {
+                                        BotToast.showText(
+                                            text:
+                                                'Failed to launch website ${url.toString()}');
+                                      }
+                                    } catch (e) {
+                                      BotToast.showText(
+                                          text: 'Failed to parse website');
+                                    }
+                                  } else {
+                                    BotToast.showText(
+                                        text:
+                                            'Team ${state.team} doesn\'t have a website on file');
+                                  }
+                                },
+                                icon: const Icon(Icons.open_in_new))
+                          ],
                         ),
                         expanded: Center(
-                          child: Linkify(
+                          child: SelectableText(
+                            state.districtRankModel!.aboutText,
                             textAlign: TextAlign.center,
-                            text: state.districtRankModel!.aboutText,
-                            onOpen: (link) async {
-                              if (await canLaunchUrlString(link.url)) {
-                                await launchUrlString(link.url);
-                              } else {
-                                throw 'Could not launch $link';
-                              }
-                            },
                           ),
                         ),
                         collapsed: const SizedBox(),
@@ -402,14 +452,14 @@ class DistrictRankHome extends StatelessWidget {
                     Container(
                       // expander awards
                       padding:
-                          const EdgeInsets.only(left: 16, right: 16, top: 20),
+                      const EdgeInsets.only(left: 16, right: 16, top: 20),
                       child: ExpandablePanel(
                         header: const Text(
                           'Awards',
                           style: TextStyle(fontSize: 20),
                         ),
                         expanded: Center(
-                          child: Text(
+                          child: SelectableText(
                             state.districtRankModel!.awardText,
                             style: const TextStyle(
                               fontSize: 14,
@@ -423,7 +473,7 @@ class DistrictRankHome extends StatelessWidget {
                     Container(
                       // expander scoring
                       padding:
-                          const EdgeInsets.only(left: 16, right: 16, top: 20),
+                      const EdgeInsets.only(left: 16, right: 16, top: 20),
                       child: ExpandablePanel(
                         header: const Text(
                           'Scoring',
@@ -432,7 +482,7 @@ class DistrictRankHome extends StatelessWidget {
                           ),
                         ),
                         expanded: Center(
-                            child: Text(
+                            child: SelectableText(
                           state.districtRankModel!.scoreInfo,
                           textAlign: TextAlign.center,
                         )),
@@ -442,7 +492,7 @@ class DistrictRankHome extends StatelessWidget {
                     Container(
                       // expander leaderboard
                       padding:
-                          const EdgeInsets.only(left: 16, right: 16, top: 20),
+                      const EdgeInsets.only(left: 16, right: 16, top: 20),
                       child: ExpandablePanel(
                         header: const Text(
                           'Leaderboard',
