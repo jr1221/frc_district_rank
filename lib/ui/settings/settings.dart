@@ -20,7 +20,7 @@ class SettingsScreen extends StatelessWidget {
           centerTitle: true,
         ),
         body: ValueListenableBuilder<Box<String>>(
-          // listen to changes in all settings
+            // listen to changes in all settings
             valueListenable:
                 Hive.box<String>(ProjectConstants.settingsBoxKey).listenable(),
             builder: (context, box, widget) {
