@@ -29,6 +29,7 @@ class DistrictRankRepository {
         throw e.toString(); // Team doesn't exist most likely
       }
     } catch (e) {
+      print(e.runtimeType);
       if (e is Set && e.first is int && e.first == 3) {
         throw '${e.elementAt(1)}'; // TODO wtf
       }
@@ -44,8 +45,23 @@ class DistrictRankRepository {
       }
     }
 
-    List<DistrictRanking> districtRankings =
-        await _fetchDistrictRankings(districtKey);
+    List<DistrictRanking> districtRankings;
+    try {
+      districtRankings = await _fetchDistrictRankings(districtKey);
+    } on DioError catch (e) {
+      if (e.response == null) {
+        throw 'Cannot connect to server.  Check your internet connection!';
+      } else {
+        print('${e.response.toString()}ZZ');
+        print(e.response?.statusMessage);
+        print(e.response?.data);
+        print(e.response?.statusCode);
+        throw e.response!.statusMessage.toString();
+      }
+    } catch (e) {
+      print(e.runtimeType);
+      rethrow;
+    }
 
     String baseAvatar = '';
     try {

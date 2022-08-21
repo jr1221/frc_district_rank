@@ -10,7 +10,6 @@ import 'package:frc_district_rank/api_key.dart';
 import 'package:hive/hive.dart';
 import 'package:tba_api_dart_dio_client/tba_api_dart_dio_client.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 import '../cache_manager.dart';
 import '../constants.dart';
@@ -120,7 +119,7 @@ class DistrictRankHome extends StatelessWidget {
               title: Text('Error, showing previous results',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Theme.of(context).errorColor)),
-              content: Text('Details: ${state.exception.toString()}'),
+              content: Text(state.exception.toString().substring(11)),
               actions: <Widget>[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -218,27 +217,27 @@ class DistrictRankHome extends StatelessWidget {
                               )),
                           TextSpan(
                               text:
-                              '${state.districtRankModel!.districtRankPretty}\n',
+                                  '${state.districtRankModel!.districtRankPretty}\n',
                               style: TextStyle(
                                 fontSize: (state.districtRankModel!
-                                    .districtRankPretty.length ==
-                                    3)
+                                            .districtRankPretty.length ==
+                                        3)
                                     ? 80
                                     : (state.districtRankModel!
-                                    .districtRankPretty.length ==
-                                    4)
-                                    ? 56
-                                    : (state
-                                    .districtRankModel!
-                                    .districtRankPretty
-                                    .length ==
-                                    5)
-                                    ? 50
-                                    : 58,
+                                                .districtRankPretty.length ==
+                                            4)
+                                        ? 56
+                                        : (state
+                                                    .districtRankModel!
+                                                    .districtRankPretty
+                                                    .length ==
+                                                5)
+                                            ? 50
+                                            : 58,
                               )),
                           TextSpan(
                             text:
-                            '${state.districtRankModel!.districtPretty}\n',
+                                '${state.districtRankModel!.districtPretty}\n',
                             style: const TextStyle(
                               fontSize: 22,
                             ),
@@ -246,8 +245,8 @@ class DistrictRankHome extends StatelessWidget {
                           if (state.year == 2019)
                             TextSpan(
                               text: DistrictCap(
-                                  districtKey:
-                                  state.districtRankModel!.districtKey)
+                                      districtKey:
+                                          state.districtRankModel!.districtKey)
                                   .prettyCapacity(),
                               style: const TextStyle(
                                 fontSize: 22,
@@ -262,7 +261,12 @@ class DistrictRankHome extends StatelessWidget {
                     ),
                     Center(
                       child: DropdownButton<String>(
-                        value: state.year.toString(),
+                        hint: Text(state.year.toString(),
+                            style: TextStyle(
+                                fontSize: 28,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .inverseSurface)),
                         icon: const Icon(
                           Icons.arrow_downward,
                         ),
@@ -278,6 +282,23 @@ class DistrictRankHome extends StatelessWidget {
                         },
                         items: state.districtRankModel!.yearsRanked
                             .map<DropdownMenuItem<String>>((String value) {
+                          // TODO, actually fix 2015, or at least provide hint
+                          if (value == '2015' ||
+                              value == state.year.toString()) {
+                            return DropdownMenuItem<String>(
+                              enabled: false,
+                              value: value,
+                              child: Center(
+                                child: Text(
+                                  value,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 28,
+                                      color: Theme.of(context).disabledColor),
+                                ),
+                              ),
+                            );
+                          }
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Center(
@@ -324,10 +345,10 @@ class DistrictRankHome extends StatelessWidget {
                                                 TextFormField(
                                                   autofocus: true,
                                                   keyboardType:
-                                                  TextInputType.number,
+                                                      TextInputType.number,
                                                   textAlign: TextAlign.center,
                                                   controller:
-                                                  _teamSelectTextController,
+                                                      _teamSelectTextController,
                                                   validator: (value) {
                                                     if (value == null ||
                                                         value.isEmpty ||
@@ -346,9 +367,9 @@ class DistrictRankHome extends StatelessWidget {
                                                               .text);
                                                       context
                                                           .read<
-                                                          DistrictRankCubit>()
+                                                              DistrictRankCubit>()
                                                           .fetchData(
-                                                          team, state.year);
+                                                              team, state.year);
                                                       Navigator.pop(context);
                                                       return;
                                                     }
@@ -356,7 +377,7 @@ class DistrictRankHome extends StatelessWidget {
                                                   decoration:
                                                   const InputDecoration(
                                                     hintText:
-                                                    'Team # from last 7 years',
+                                                        'Team # from last 7 years',
                                                   ),
                                                 ),
                                               ],
@@ -370,7 +391,7 @@ class DistrictRankHome extends StatelessWidget {
                                       actions: <Widget>[
                                         Row(
                                           mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                              MainAxisAlignment.center,
                                           children: [
                                             Expanded(
                                               flex: 2,
@@ -384,9 +405,9 @@ class DistrictRankHome extends StatelessWidget {
                                                             .text);
                                                     context
                                                         .read<
-                                                        DistrictRankCubit>()
+                                                            DistrictRankCubit>()
                                                         .fetchData(
-                                                        team, state.year);
+                                                            team, state.year);
                                                     Navigator.pop(context);
                                                     return;
                                                   }
@@ -405,7 +426,7 @@ class DistrictRankHome extends StatelessWidget {
                     Container(
                       // expander about
                       padding:
-                      const EdgeInsets.only(left: 16, right: 16, top: 20),
+                          const EdgeInsets.only(left: 16, right: 16, top: 20),
                       child: ExpandablePanel(
                         header: Row(
                           children: [
@@ -452,7 +473,7 @@ class DistrictRankHome extends StatelessWidget {
                     Container(
                       // expander awards
                       padding:
-                      const EdgeInsets.only(left: 16, right: 16, top: 20),
+                          const EdgeInsets.only(left: 16, right: 16, top: 20),
                       child: ExpandablePanel(
                         header: const Text(
                           'Awards',
@@ -473,7 +494,7 @@ class DistrictRankHome extends StatelessWidget {
                     Container(
                       // expander scoring
                       padding:
-                      const EdgeInsets.only(left: 16, right: 16, top: 20),
+                          const EdgeInsets.only(left: 16, right: 16, top: 20),
                       child: ExpandablePanel(
                         header: const Text(
                           'Scoring',
@@ -492,7 +513,7 @@ class DistrictRankHome extends StatelessWidget {
                     Container(
                       // expander leaderboard
                       padding:
-                      const EdgeInsets.only(left: 16, right: 16, top: 20),
+                          const EdgeInsets.only(left: 16, right: 16, top: 20),
                       child: ExpandablePanel(
                         header: const Text(
                           'Leaderboard',
