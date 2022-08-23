@@ -375,7 +375,7 @@ class DistrictRankHome extends StatelessWidget {
                                                     }
                                                   },
                                                   decoration:
-                                                  const InputDecoration(
+                                                      const InputDecoration(
                                                     hintText:
                                                         'Team # from last 7 years',
                                                   ),

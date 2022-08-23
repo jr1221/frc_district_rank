@@ -9,16 +9,49 @@ class DistrictRankRepository {
   DistrictRankRepository({required this.tbaApi});
 
   Future<DistrictRankModel> fetchModel(int team, int year) async {
-    List<DistrictList> districtList;
-    Team teamObj;
-    List<Award> awards;
-    List<Media> avatarMedia;
+    Team? teamObj;
+    List<Award> awards = [];
+
+    List<String> yearsRanked = [];
+    String districtKey = '';
+    String baseAvatar = '';
+    int districtRank = -1;
+    List<DistrictRanking> districtRankingsFin = [];
 
     try {
-      districtList = await _fetchDistrictKey(team);
-      teamObj = await _fetchTeamAbout(team);
-      awards = await _fetchTeamAwards(team, year);
-      avatarMedia = await _fetchTeamAvatar(team, year);
+      await Future.wait([
+        _fetchDistrictKey(team).then((districtList) async {
+          for (DistrictList element in districtList) {
+            yearsRanked.add(element.year.toString());
+            if (element.year == year) {
+              districtKey = element.key;
+            }
+          }
+
+          await _fetchDistrictRankings(districtKey).then((districtRankings) {
+            districtRankingsFin = districtRankings;
+            for (DistrictRanking element in districtRankings) {
+              if (element.teamKey == 'frc$team') {
+                districtRank = element.rank;
+                break;
+              }
+            }
+          });
+        }),
+        _fetchTeamAwards(team, year).then((value) => awards = value),
+        _fetchTeamAvatar(team, year).then((avatarMedia) {
+          try {
+            if (avatarMedia.isNotEmpty &&
+                avatarMedia.first.details.toString().contains('base64Image')) {
+              baseAvatar = avatarMedia.first.details!.toString().substring(
+                  14, avatarMedia.first.details.toString().length - 1);
+            }
+          } catch (_) {
+            baseAvatar = '';
+          }
+        }),
+        _fetchTeamAbout(team).then((value) => teamObj = value)
+      ], eagerError: true);
     } on DioError catch (e) {
       if (e.response == null) {
         throw 'Cannot connect to server.  Check your internet connection!';
@@ -36,60 +69,14 @@ class DistrictRankRepository {
       rethrow;
     }
 
-    List<String> yearsRanked = [];
-    String districtKey = '';
-    for (DistrictList element in districtList) {
-      yearsRanked.add(element.year.toString());
-      if (element.year == year) {
-        districtKey = element.key;
-      }
-    }
-
-    List<DistrictRanking> districtRankings;
-    try {
-      districtRankings = await _fetchDistrictRankings(districtKey);
-    } on DioError catch (e) {
-      if (e.response == null) {
-        throw 'Cannot connect to server.  Check your internet connection!';
-      } else {
-        print('${e.response.toString()}ZZ');
-        print(e.response?.statusMessage);
-        print(e.response?.data);
-        print(e.response?.statusCode);
-        throw e.response!.statusMessage.toString();
-      }
-    } catch (e) {
-      print(e.runtimeType);
-      rethrow;
-    }
-
-    String baseAvatar = '';
-    try {
-      if (avatarMedia.isNotEmpty &&
-          avatarMedia.first.details.toString().contains('base64Image')) {
-        baseAvatar = avatarMedia.first.details!
-            .toString()
-            .substring(14, avatarMedia.first.details.toString().length - 1);
-      }
-    } catch (_) {
-      baseAvatar = '';
-    }
-
-    int districtRank = -1;
-    for (DistrictRanking element in districtRankings) {
-      if (element.teamKey == 'frc$team') {
-        districtRank = element.rank;
-        break;
-      }
-    }
-
     return DistrictRankModel(team, year,
         districtRank: districtRank,
         districtKey: districtKey,
         awards: awards,
-        rankings: districtRankings,
+        rankings: districtRankingsFin,
         baseAvatar: baseAvatar,
-        teamObj: teamObj,
+        teamObj: teamObj ?? Team(),
+        // TODO hacky
         yearsRanked: yearsRanked);
   }
 
