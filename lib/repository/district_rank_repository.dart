@@ -16,7 +16,7 @@ class DistrictRankRepository {
     Team? teamObj;
     List<Award> awards = [];
 
-    List<String> yearsRanked = [];
+    List<int> yearsRanked = [];
     String districtKey = '';
     String baseAvatar = '';
     int districtRank = -1;
@@ -25,7 +25,7 @@ class DistrictRankRepository {
     try {
       await _fetchDistrictKey(team).then((districtList) async {
         for (DistrictList element in districtList) {
-          yearsRanked.add(element.year.toString());
+          yearsRanked.add(element.year);
           if (element.year == year) {
             districtKey = element.key;
           }
@@ -33,9 +33,11 @@ class DistrictRankRepository {
 
         // Basically if team didnt compete that year
         if (districtKey.isEmpty) {
-          //   int closestYear = yearsRanked;
+          yearsRanked.remove(2015);
+          int closestYear = _sort(year, yearsRanked);
 
-          throw FetchException('Team $team did not compete in $year',
+          throw FetchException(
+              'Team $team does not have records from $year, maybe try $closestYear.',
               FetchExceptionType.wrongYear);
         }
 
@@ -114,14 +116,14 @@ class DistrictRankRepository {
 
   Future<List<DistrictList>> _fetchDistrictKey(int team) async {
     final response =
-    await tbaApi.getDistrictApi().getTeamDistricts(teamKey: 'frc$team');
+        await tbaApi.getDistrictApi().getTeamDistricts(teamKey: 'frc$team');
     return response.data!.toList();
   }
 
   Future<Team> _fetchTeamAbout(int team) async {
     final response = await tbaApi.getTeamApi().getTeam(
-      teamKey: 'frc$team',
-    );
+          teamKey: 'frc$team',
+        );
     return response.data!;
   }
 
@@ -139,10 +141,24 @@ class DistrictRankRepository {
     return response.data!.toList();
   }
 
-  Future<List<DistrictRanking>> _fetchDistrictRankings(String districtKey) async {
+  Future<List<DistrictRanking>> _fetchDistrictRankings(
+      String districtKey) async {
     final response = await tbaApi
         .getDistrictApi()
         .getDistrictRankings(districtKey: districtKey);
     return response.data!.toList();
+  }
+
+  int _sort(int year, List<int> yearsRanked) {
+    // try bigger and smaller, yearsRanked sorted earliest ro most recent
+    if (year > yearsRanked.last) {
+      return yearsRanked.last;
+    }
+    if (year < yearsRanked.first) {
+      return yearsRanked.first;
+    }
+
+    // just give middle year
+    return yearsRanked.elementAt((yearsRanked.length / 2.0).round());
   }
 }

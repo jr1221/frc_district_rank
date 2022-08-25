@@ -12,7 +12,7 @@ class DistrictRankModel {
   final Team teamObj;
 
   final String baseAvatar;
-  final List<String> yearsRanked;
+  final List<int> yearsRanked;
 
   DistrictRankModel(this._team, this._year,
       {required this.districtRank,

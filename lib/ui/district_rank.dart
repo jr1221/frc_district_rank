@@ -134,12 +134,12 @@ class DistrictRankHome extends StatelessWidget {
                           Navigator.pop(context);
                         },
                         child: const Text('Ok'),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
+              ],
+            ),
           );
           break;
       }
@@ -263,7 +263,7 @@ class DistrictRankHome extends StatelessWidget {
                       height: 30.0,
                     ),
                     Center(
-                      child: DropdownButton<String>(
+                      child: DropdownButton<int>(
                         hint: Text(state.year.toString(),
                             style: TextStyle(
                                 fontSize: 28,
@@ -281,19 +281,18 @@ class DistrictRankHome extends StatelessWidget {
                         onChanged: (newValue) {
                           context
                               .read<DistrictRankCubit>()
-                              .fetchData(state.team, int.parse(newValue!));
+                              .fetchData(state.team, newValue!);
                         },
                         items: state.districtRankModel!.yearsRanked
-                            .map<DropdownMenuItem<String>>((String value) {
+                            .map<DropdownMenuItem<int>>((int value) {
                           // TODO, actually fix 2015, or at least provide hint
-                          if (value == '2015' ||
-                              value == state.year.toString()) {
-                            return DropdownMenuItem<String>(
+                          if (value == 2015 || value == state.year) {
+                            return DropdownMenuItem<int>(
                               enabled: false,
                               value: value,
                               child: Center(
                                 child: Text(
-                                  value,
+                                  value.toString(),
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 28,
@@ -302,11 +301,11 @@ class DistrictRankHome extends StatelessWidget {
                               ),
                             );
                           }
-                          return DropdownMenuItem<String>(
+                          return DropdownMenuItem<int>(
                             value: value,
                             child: Center(
                               child: Text(
-                                value,
+                                value.toString(),
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(fontSize: 28),
                               ),
