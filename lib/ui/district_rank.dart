@@ -112,6 +112,9 @@ class DistrictRankHome extends StatelessWidget {
         case DistrictRankStatus.success:
           break;
         case DistrictRankStatus.failure:
+          String showErrMessage =
+              state.exception?.toString() ?? 'Unknown Error';
+
           showDialog<Widget>(
             context: context,
             barrierDismissible: false,
@@ -119,7 +122,7 @@ class DistrictRankHome extends StatelessWidget {
               title: Text('Error, showing previous results',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Theme.of(context).errorColor)),
-              content: Text(state.exception.toString().substring(11)),
+              content: Text(showErrMessage),
               actions: <Widget>[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -131,12 +134,12 @@ class DistrictRankHome extends StatelessWidget {
                           Navigator.pop(context);
                         },
                         child: const Text('Ok'),
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
           );
           break;
       }
