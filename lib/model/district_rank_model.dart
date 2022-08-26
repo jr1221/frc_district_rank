@@ -1,48 +1,99 @@
 import 'package:flutter/material.dart';
 import 'package:tba_api_dart_dio_client/tba_api_dart_dio_client.dart';
 
+const Map<String, int> knownDistrictCapacities = {
+  '2019chs': 58,
+  '2019fim': 160,
+  '2019fma': 60,
+  '2019fnc': 32,
+  '2019in': 32,
+  '2019isr': 45,
+  '2019ne': 64,
+  '2019ont': 80,
+  '2019pch': 45,
+  '2019pnw': 64,
+  '2019tx': 64,
+};
+
 class DistrictRankModel {
   final int _team;
   final int _year;
 
-  final int districtRank;
-  final String districtKey;
-  final List<Award> awards;
-  final List<DistrictRanking> rankings;
-  final Team teamObj;
-
-  final String baseAvatar;
+  // public for the dropdownmenu
   final List<int> yearsRanked;
 
-  DistrictRankModel(this._team, this._year,
-      {required this.districtRank,
-      required this.districtKey,
-      required this.awards,
-      required this.rankings,
-      required this.baseAvatar,
-      required this.teamObj,
-      required this.yearsRanked});
+  // Private as getters return pretty versions or parsed versions of this stuff
+  final Team _teamObj;
+  final List<Award> _awards;
+  final List<Media> _avatarMedia;
+  final List<DistrictRanking> _districtRankings;
 
+  final String _districtKey;
+
+  DistrictRankModel(
+    this._team,
+    this._year, {
+    required this.yearsRanked,
+    required Team teamObj,
+    required List<Award> awards,
+    required List<Media> avatarMedia,
+    required List<DistrictRanking> districtRankings,
+    required String districtKey,
+  })  : _teamObj = teamObj,
+        _awards = awards,
+        _avatarMedia = avatarMedia,
+        _districtRankings = districtRankings,
+        _districtKey = districtKey;
+
+  // Uses _districtRankings
+  int get _districtRank {
+    for (DistrictRanking element in _districtRankings) {
+      if (element.teamKey == 'frc$_team') {
+        return element.rank;
+      }
+    }
+    return -1;
+  }
+
+  // Uses _avatarMedia
+  /// Returns the avatar of the team that year, or null if none
+  String? get baseAvatar {
+    String? baseAvatar;
+    try {
+      if (_avatarMedia.isNotEmpty &&
+          _avatarMedia.first.details.toString().contains('base64Image')) {
+        baseAvatar = _avatarMedia.first.details!
+            .toString()
+            .substring(14, _avatarMedia.first.details.toString().length - 1);
+      }
+    } catch (_) {}
+
+    return baseAvatar;
+  }
+
+  // Uses teamObj
+  /// Returns a helpful summary of the team
   String get aboutText {
     String aboutText = '';
-    aboutText += teamObj.nickname!;
-    aboutText += '\n\n${teamObj.name}';
-    aboutText += '\n\nRookie year: ${teamObj.rookieYear}';
-    aboutText += '\n\n${teamObj.schoolName}';
+    aboutText += _teamObj.nickname!;
+    aboutText += '\n\n${_teamObj.name}';
+    aboutText += '\n\nRookie year: ${_teamObj.rookieYear}';
+    aboutText += '\n\n${_teamObj.schoolName}';
     aboutText +=
-        '\n${teamObj.city}, ${teamObj.stateProv}, ${teamObj.country} ${teamObj.postalCode}';
+        '\n${_teamObj.city}, ${_teamObj.stateProv}, ${_teamObj.country} ${_teamObj.postalCode}';
     return aboutText;
   }
 
+  // Uses teamObj
+  /// Returns the team website in https:// format, or null if none listed
   String? get teamWebsite =>
-      teamObj.website?.replaceFirst('http://', 'https://');
+      _teamObj.website?.replaceFirst('http://', 'https://');
 
-  /*
-  Uses - awards, team
-   */
+  // Uses - awards, team
+  /// Returns the team awards in that year, or a message saying no awards were won that year
   String get awardText {
     String awardText = '';
-    for (Award award in awards) {
+    for (Award award in _awards) {
       awardText += '\n\n\n${award.name} -- Event: ${award.eventKey}\n';
       if (award.recipientList.isNotEmpty) {
         awardText += '\nGiven to: ';
@@ -58,43 +109,58 @@ class DistrictRankModel {
     return awardText;
   }
 
-  /*
-  Uses - districtRank
-   */
+  // Uses - districtKey
+  /// Returns the capacity w/ label if such districtKey was manually entered into the system
+  String? get prettyCapacity {
+    int? capacity;
+
+    for (final entry in knownDistrictCapacities.entries) {
+      if (entry.key == _districtKey) {
+        capacity = entry.value;
+        break;
+      }
+    }
+    if (capacity != null) {
+      return 'Capacity: $capacity';
+    }
+    return null;
+  }
+
+  // Uses - districtRank
+  ///  Returns the district pretty
   String get districtPretty {
-    String districtPretty = districtKey.substring(4).toUpperCase();
+    String districtPretty = _districtKey.substring(4).toUpperCase();
     districtPretty += ' District';
     return districtPretty;
   }
 
-  /*
-  Uses - districtRank
-   */
+  // Uses - districtRank
+  /// Returns the district rank pretty (ex. ##th)
   String get districtRankPretty {
     String districtRankPretty;
-    switch (
-        districtRank.toString().substring(districtRank.toString().length - 1)) {
+    switch (_districtRank
+        .toString()
+        .substring(_districtRank.toString().length - 1)) {
       case '1':
-        districtRankPretty = '${districtRank}st';
+        districtRankPretty = '${_districtRank}st';
         break;
       case '2':
-        districtRankPretty = '${districtRank}nd';
+        districtRankPretty = '${_districtRank}nd';
         break;
       case '3':
-        districtRankPretty = '${districtRank}rd';
+        districtRankPretty = '${_districtRank}rd';
         break;
       default:
-        districtRankPretty = '${districtRank}th';
+        districtRankPretty = '${_districtRank}th';
     }
     return districtRankPretty;
   }
 
-  /*
-  Uses - team, year, rankings
-   */
+  // Uses - team, year, rankings
+  /// Returns the score info for each event the team competed in that year
   String get scoreInfo {
     String scoreInfo = 'Team $_team does not or has not competed in $_year!';
-    for (DistrictRanking rankedTeam in rankings) {
+    for (DistrictRanking rankedTeam in _districtRankings) {
       if (_team.toString() == rankedTeam.teamKey.substring(3) &&
           rankedTeam.pointTotal != 0) {
         scoreInfo = '${rankedTeam.pointTotal} Points';
@@ -116,12 +182,11 @@ class DistrictRankModel {
     return scoreInfo;
   }
 
-  /*
-  Uses - team, rankings
-   */
+  // Uses - team, rankings
+  /// Returns the +- 6 teams in the district ranking leaderboard from the team that year
   List<DataRow> rowList() {
     List<DataRow> rowList = <DataRow>[];
-    for (DistrictRanking teamRanked in rankings) {
+    for (DistrictRanking teamRanked in _districtRankings) {
       if (_team.toString() == teamRanked.teamKey.substring(3)) {
         rowList.add(DataRow(cells: <DataCell>[
           DataCell(Text(teamRanked.rank.toString(),
@@ -133,8 +198,8 @@ class DistrictRankModel {
           DataCell(Text(teamRanked.pointTotal.toString(),
               style: const TextStyle(fontWeight: FontWeight.w900))),
         ]));
-      } else if (6 > (teamRanked.rank - districtRank) &&
-          -6 < (teamRanked.rank - districtRank)) {
+      } else if (6 > (teamRanked.rank - _districtRank) &&
+          -6 < (teamRanked.rank - _districtRank)) {
         rowList.add(DataRow(cells: <DataCell>[
           DataCell(Text(
             teamRanked.rank.toString(),

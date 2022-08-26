@@ -13,66 +13,43 @@ class DistrictRankRepository {
   DistrictRankRepository({required this.tbaApi});
 
   Future<DistrictRankModel> fetchModel(int team, int year) async {
+    List<int>? yearsRanked;
     Team? teamObj;
-    List<Award> awards = [];
+    List<Award>? awards;
+    List<Media>? avatarMedia;
+    List<DistrictRanking>? districtRankings;
 
-    List<int> yearsRanked = [];
-    String districtKey = '';
-    String baseAvatar = '';
-    int districtRank = -1;
-    List<DistrictRanking> districtRankingsFin = [];
+    String? districtKey;
 
     try {
       await _fetchDistrictKey(team).then((districtList) async {
-        for (DistrictList element in districtList) {
-          yearsRanked.add(element.year);
-          if (element.year == year) {
-            districtKey = element.key;
-          }
-        }
-
-        // Basically if team didnt compete that year
-        if (districtKey.isEmpty) {
-          yearsRanked.remove(2015);
-          int closestYear = _sort(year, yearsRanked);
+        // iterate through the district and find the one for this year, or else throw the exception with nearby years
+        DistrictList districtForThisYear = districtList
+            .firstWhere((element) => year == element.year, orElse: () {
+          int closestYear = _sort(year, districtList.map((e) => e.year));
 
           throw FetchException(
               'Team $team does not have records from $year, maybe try $closestYear.',
               FetchExceptionType.wrongYear);
-        }
-
-        await _fetchDistrictRankings(districtKey).then((districtRankings) {
-          districtRankingsFin = districtRankings;
-          for (DistrictRanking element in districtRankings) {
-            if (element.teamKey == 'frc$team') {
-              districtRank = element.rank;
-              break;
-            }
-          }
         });
+
+        // Since team did compete that year, pass the yearsRanked and districtKey to model, and then fetch the actual rankings for that districtKey
+
+        yearsRanked = districtList.map((e) => e.year).toList();
+        districtKey = districtForThisYear.key;
+
+        await _fetchDistrictRankings(districtKey!)
+            .then((value) => districtRankings = value);
       });
       await Future.wait([
         _fetchTeamAwards(team, year).then((value) => awards = value),
-        _fetchTeamAvatar(team, year).then((avatarMedia) {
-          try {
-            if (avatarMedia.isNotEmpty &&
-                avatarMedia.first.details.toString().contains('base64Image')) {
-              baseAvatar = avatarMedia.first.details!.toString().substring(
-                  14, avatarMedia.first.details.toString().length - 1);
-            }
-          } catch (_) {
-            baseAvatar = '';
-          }
-        }),
+        _fetchTeamAvatar(team, year).then((value) => avatarMedia = value),
         _fetchTeamAbout(team).then((value) => teamObj = value)
       ], eagerError: true);
     } on FetchException {
       // team did not compete in the given year
       rethrow;
     } on DioError catch (e) {
-      print(e.response?.data.runtimeType);
-      print(e.response?.data);
-
       // no response from server
       if (e.response == null) {
         throw const FetchException(
@@ -103,15 +80,16 @@ class DistrictRankRepository {
       throw FetchException('Unknown Error: $e', FetchExceptionType.other);
     }
 
-    return DistrictRankModel(team, year,
-        districtRank: districtRank,
-        districtKey: districtKey,
-        awards: awards,
-        rankings: districtRankingsFin,
-        baseAvatar: baseAvatar,
-        teamObj: teamObj ?? Team(),
-        // TODO hacky
-        yearsRanked: yearsRanked);
+    return DistrictRankModel(
+      team,
+      year,
+      yearsRanked: yearsRanked ?? [],
+      teamObj: teamObj ?? Team(),
+      awards: awards ?? [],
+      avatarMedia: avatarMedia ?? [],
+      districtRankings: districtRankings ?? [],
+      districtKey: districtKey ?? '',
+    );
   }
 
   Future<List<DistrictList>> _fetchDistrictKey(int team) async {
@@ -149,7 +127,7 @@ class DistrictRankRepository {
     return response.data!.toList();
   }
 
-  int _sort(int year, List<int> yearsRanked) {
+  int _sort(int year, Iterable<int> yearsRanked) {
     // try bigger and smaller, yearsRanked sorted earliest ro most recent
     if (year > yearsRanked.last) {
       return yearsRanked.last;

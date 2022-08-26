@@ -16,3 +16,5 @@ void main() async {
 
   runApp(const MyApp());
 }
+
+// Order: most stuff, styling, child, functions
