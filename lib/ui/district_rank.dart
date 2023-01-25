@@ -543,7 +543,32 @@ class DistrictRankHome extends StatelessWidget {
               },
             );
           } else {
-            return const Text('Unknown error');
+            return Center(
+                child: Column(
+              children: [
+                const SizedBox(
+                  height: 16.0,
+                ),
+                const Text(
+                  'Cannot connect to TBA server or build cache!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16.0),
+                ),
+                const SizedBox(
+                  height: 8.0,
+                ),
+                ElevatedButton(
+                  child: const Text(
+                    'Retry',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 28.0),
+                  ),
+                  onPressed: () {
+                    context.read<DistrictRankCubit>().fetchData(1, 2022);
+                  },
+                )
+              ],
+            ));
           }
       }
     });
