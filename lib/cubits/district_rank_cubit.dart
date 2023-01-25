@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frc_district_rank/constants.dart';
 import 'package:frc_district_rank/exceptions.dart';
@@ -29,7 +30,9 @@ class DistrictRankCubit extends Cubit<DistrictRankState> {
     } on FetchException catch (e) {
       emit(state.copyWith(status: DistrictRankStatus.failure, exception: e));
     } catch (exception) {
-      print('BAD: $exception');
+      if (kDebugMode) {
+        print('BAD: $exception');
+      }
       emit(state.copyWith(
           status: DistrictRankStatus.failure, exception: Exception(exception)));
     }

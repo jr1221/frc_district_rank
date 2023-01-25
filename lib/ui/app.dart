@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:frc_district_rank/ui/settings/settings.dart';
 import 'package:frc_district_rank/ui/settings/theme_selection.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 
 import '../constants.dart';

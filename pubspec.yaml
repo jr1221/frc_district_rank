@@ -7,24 +7,24 @@ publish_to: 'none'
 version: 1.1.0
 
 environment:
-  sdk: ">=2.17.6 <3.0.0"
+  sdk: ">=2.19.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  flutter_bloc: ^8.0.0
+  flutter_bloc: ^8.1.1
   tba_api_dart_dio_client:
     git: https://github.com/jr1221/tba_api_dart_dio_client
-  dio:
+  dio: 4.0.4 # dio 4.0.6 has a bug (Bad state err on web)
   expandable: ^5.0.1
   flutter_linkify: ^5.0.2
-  url_launcher: ^6.1.5
+  url_launcher: ^6.1.8
   settings_ui: ^2.0.2
-  dio_cache_interceptor: ^3.3.0
+  dio_cache_interceptor: ^3.3.1
   dio_cache_interceptor_hive_store: ^3.2.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  path_provider:
+  path_provider: ^2.0.12
   bot_toast: ^4.0.3
   flutter_colorpicker: ^1.0.3
 

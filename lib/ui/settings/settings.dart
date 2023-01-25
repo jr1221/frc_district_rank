@@ -97,9 +97,7 @@ class SettingsScreen extends StatelessWidget {
                         title: const Text('Clear cache'),
                         onPressed: (context) async {
                           try {
-                            await (await Hive.openLazyBox<CacheResponse>(
-                                    CacheManager.hiveCacheStore!.hiveBoxName))
-                                .clear();
+                            CacheManager.hiveCacheStore!.clean();
                             BotToast.showText(
                                 text: 'Successfully cleared cache!');
                           } catch (e) {

@@ -37,10 +37,8 @@ class DistrictRankScreen extends StatelessWidget {
                   policy: CachePolicy.request,
                   hitCacheOnErrorExcept: [401, 403, 404],
                   // on not found, show errer, then use cubit to restore previous state
-                  store: BackupCacheStore(
-                      primary: MemCacheStore(),
-                      secondary: CacheManager
-                          .hiveCacheStore!), // needs CacheManager.init()
+                  store: CacheManager
+                      .hiveCacheStore!, // needs CacheManager.init()
                 )))
             ..setApiKey('apiKey',
                 apiKey); // from lib/api_key.dart, variable const apiKey = 'XXXXX'; <-- TBA api key from account settings
@@ -72,8 +70,8 @@ class DistrictRankScreen extends StatelessWidget {
                     LinkableElement(
                         'The Blue Alliance', 'https://thebluealliance.com'),
                   ],
-                  linkStyle: TextStyle(
-                    color: Theme.of(context).toggleableActiveColor,
+                  linkStyle: const TextStyle(
+                    color: Colors.lightBlue,
                     decoration: TextDecoration.underline,
                   ),
                   onOpen: (link) async {
@@ -119,7 +117,7 @@ class DistrictRankHome extends StatelessWidget {
             barrierDismissible: false,
             builder: (context) => AlertDialog(
               title: Text('Error, showing previous results',
-                  style: TextStyle(color: Theme.of(context).errorColor),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
                   textAlign: TextAlign.center),
               content: Text(showErrMessage),
               actions: <Widget>[
