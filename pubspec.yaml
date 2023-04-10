@@ -12,24 +12,24 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_bloc: ^8.1.1
+  flutter_bloc: ^8.1.2
   tba_api_dart_dio_client:
     git: https://github.com/jr1221/tba_api_dart_dio_client
-  dio: 4.0.4 # dio 4.0.6 has a bug (Bad state err on web)
-  expandable: ^5.0.1
-  flutter_linkify: ^5.0.2
-  url_launcher: ^6.1.8
-  settings_ui: ^2.0.2
-  dio_cache_interceptor: ^3.3.1
-  dio_cache_interceptor_hive_store: ^3.2.0
+  dio: ^5.1.1
+  expandable: ^5.0.1 # abandoned?
+  flutter_linkify: ^5.0.2 # abandoned?
+  url_launcher: ^6.1.10
+  settings_ui: ^2.0.2 # abandoned?
+  dio_cache_interceptor: ^3.4.2
+  dio_cache_interceptor_hive_store: ^3.2.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  path_provider: ^2.0.12
+  path_provider: ^2.0.14
   bot_toast: ^4.0.3
   flutter_colorpicker: ^1.0.3
 
 dev_dependencies:
-  flutter_lints: ^2.0.0
+  flutter_lints: ^2.0.1
 
 flutter:
   uses-material-design: true
