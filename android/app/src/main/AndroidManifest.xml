@@ -1,6 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    package="com.jr12221.frc_district_rank">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
     <application
-        android:label="frc_district_rank"
+        android:label="FRC District Rank"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
