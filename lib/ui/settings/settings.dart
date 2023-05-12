@@ -1,7 +1,6 @@
 import 'package:bot_toast/bot_toast.dart';
-import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:settings_ui/settings_ui.dart';
 
@@ -41,10 +40,11 @@ class SettingsScreen extends StatelessWidget {
                               // put current platform mode into hive darkMode
                               box.put(
                                   ProjectConstants.darkModeStorageKey,
-                                  ((SchedulerBinding.instance.window
+                                  (View.of(context)
+                                              .platformDispatcher
                                               .platformBrightness ==
                                           Brightness.dark)
-                                      .toString()));
+                                      .toString());
                             }
                           }),
                       // if user preference set, show dark theme switch
@@ -65,13 +65,50 @@ class SettingsScreen extends StatelessWidget {
                         title: const Text('Color Theme'),
                         description: const Text('Change the color theming'),
                         // current colorScheme for theme in hive
-                        trailing: Icon(Icons.square_rounded,
+                        trailing: ColorIndicator(
                             color: Color(int.parse(box.get(
                                 ProjectConstants.colorSchemeStorageKey,
                                 defaultValue:
                                     Colors.blueGrey.value.toString())!))),
-                        onPressed: (context) {
-                          Navigator.pushNamed(context, '/settings/theme');
+                        onPressed: (context) async {
+                          {
+                            await ColorPicker(
+                              color: Color(int.parse(box.get(
+                                  ProjectConstants.colorSchemeStorageKey,
+                                  defaultValue:
+                                      Colors.blueGrey.value.toString())!)),
+                              onColorChanged: (Color color) {},
+                              onColorChangeEnd: (Color color) =>
+                                  _changeColorValue(color.value),
+                              heading: Text(
+                                'Select color',
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
+                              ),
+                              wheelSubheading: Text(
+                                'Selected color and its shades',
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                              showMaterialName: true,
+                              showColorName: true,
+                              showColorCode: true,
+                              enableShadesSelection: false,
+                              enableTonalPalette: false,
+                              copyPasteBehavior:
+                                  const ColorPickerCopyPasteBehavior(
+                                copyFormat: ColorPickerCopyFormat.hexRRGGBB,
+                                longPressMenu: true,
+                              ),
+                              pickersEnabled: const <ColorPickerType, bool>{
+                                ColorPickerType.both: true,
+                                ColorPickerType.primary: false,
+                                ColorPickerType.accent: false,
+                                ColorPickerType.bw: false,
+                                ColorPickerType.custom: false,
+                                ColorPickerType.wheel: true,
+                              },
+                            ).showPickerDialog(context);
+                          }
                         },
                       )
                     ],
@@ -120,14 +157,14 @@ class SettingsScreen extends StatelessWidget {
                           })
                     ],
                   ),
-                  CustomSettingsSection(
+                  const CustomSettingsSection(
                     child: Column(
-                      children: const [
+                      children: [
                         SizedBox(
                           height: 16,
                         ),
                         Text(
-                          'Version: 1.1.0',
+                          'Version: 1.2.0',
                         ),
                       ],
                     ),
@@ -135,6 +172,11 @@ class SettingsScreen extends StatelessWidget {
                 ],
               );
             }));
+  }
+
+  Future<void> _changeColorValue(int colorValue) async {
+    await Hive.box<String>(ProjectConstants.settingsBoxKey)
+        .put(ProjectConstants.colorSchemeStorageKey, colorValue.toString());
   }
 }
 

@@ -1,8 +1,6 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:frc_district_rank/ui/settings/settings.dart';
-import 'package:frc_district_rank/ui/settings/theme_selection.dart';
 import 'package:hive_flutter/adapters.dart';
 
 import '../constants.dart';
@@ -55,7 +53,6 @@ class MyApp extends StatelessWidget {
             routes: {
               '/': (context) => const DistrictRankScreen(),
               '/settings': (context) => const SettingsScreen(),
-              '/settings/theme': (context) => const ThemeSelectionScreen()
             },
             builder: BotToastInit(),
             theme: ThemeData.from(
@@ -66,7 +63,7 @@ class MyApp extends StatelessWidget {
                     seedColor: colorSchemeColor, brightness: Brightness.dark)),
             // darkMode ON or OFF if manually set, else use platform mode
             themeMode: (darkMode ??
-                    SchedulerBinding.instance.window.platformBrightness ==
+                    View.of(context).platformDispatcher.platformBrightness ==
                         Brightness.dark)
                 ? ThemeMode.dark
                 : ThemeMode.light,
