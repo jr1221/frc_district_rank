@@ -11,8 +11,8 @@ class DistrictRankState {
 
   const DistrictRankState(
       {this.status = DistrictRankStatus.initial,
-      this.year = 2023,
-      this.team = 1,
+      this.year = ProjectConstants.defaultYear,
+      this.team = ProjectConstants.defaultTeam,
       this.districtRankModel,
       this.exception});
 

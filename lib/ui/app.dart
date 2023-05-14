@@ -1,6 +1,6 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
-import 'package:frc_district_rank/ui/settings/settings.dart';
+import 'package:frc_district_rank/ui/settings.dart';
 import 'package:hive_flutter/adapters.dart';
 
 import '../constants.dart';
@@ -56,9 +56,11 @@ class MyApp extends StatelessWidget {
             },
             builder: BotToastInit(),
             theme: ThemeData.from(
+                useMaterial3: true,
                 colorScheme: ColorScheme.fromSeed(
                     seedColor: colorSchemeColor, brightness: Brightness.light)),
             darkTheme: ThemeData.from(
+                useMaterial3: true,
                 colorScheme: ColorScheme.fromSeed(
                     seedColor: colorSchemeColor, brightness: Brightness.dark)),
             // darkMode ON or OFF if manually set, else use platform mode

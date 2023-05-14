@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:settings_ui/settings_ui.dart';
 
-import '../../cache_manager.dart';
-import '../../constants.dart';
+import '../cache_manager.dart';
+import '../constants.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -164,7 +164,7 @@ class SettingsScreen extends StatelessWidget {
                           height: 16,
                         ),
                         Text(
-                          'Version: 1.2.0',
+                          'Version: 1.2.1',
                         ),
                       ],
                     ),

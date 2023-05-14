@@ -554,7 +554,7 @@ class DistrictRankHome extends StatelessWidget {
                     style: TextStyle(fontSize: 28.0),
                   ),
                   onPressed: () {
-                    context.read<DistrictRankCubit>().fetchData(1, 2022);
+                    context.read<DistrictRankCubit>().fetchData(ProjectConstants.defaultTeam, ProjectConstants.defaultYear);
                   },
                 )
               ],
