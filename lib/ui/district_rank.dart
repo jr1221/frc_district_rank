@@ -37,8 +37,8 @@ class DistrictRankScreen extends StatelessWidget {
                   policy: CachePolicy.request,
                   hitCacheOnErrorExcept: [401, 403, 404],
                   // on not found, show errer, then use cubit to restore previous state
-                  store: CacheManager
-                      .hiveCacheStore!, // needs CacheManager.init()
+                  store:
+                      CacheManager.hiveCacheStore!, // needs CacheManager.init()
                 )))
             ..setApiKey('apiKey',
                 apiKey); // from lib/api_key.dart, variable const apiKey = 'XXXXX'; <-- TBA api key from account settings
@@ -261,7 +261,7 @@ class DistrictRankHome extends StatelessWidget {
                           ),
                           items: state.districtRankModel!.yearsRanked
                               .map<DropdownMenuItem<int>>((int value) {
-                            if (value == 2015 || value == state.year) {
+                            if (value == state.year) {
                               return DropdownMenuItem<int>(
                                   value: value,
                                   child: Center(
@@ -274,17 +274,9 @@ class DistrictRankHome extends StatelessWidget {
                                               Theme.of(context).disabledColor),
                                     ),
                                   ),
-                                  onTap: () {
-                                    if (value == 2015) {
-                                      BotToast.showText(
-                                          text:
-                                              'Currently data from 2015 is inaccessible due to a bug in the app. Sorry:(');
-                                    } else {
-                                      BotToast.showText(
-                                          text:
-                                              'You were already on ${state.year}');
-                                    }
-                                  });
+                                  onTap: () => BotToast.showText(
+                                      text:
+                                          'You were already on ${state.year}'));
                             }
                             return DropdownMenuItem<int>(
                               value: value,
@@ -298,7 +290,7 @@ class DistrictRankHome extends StatelessWidget {
                             );
                           }).toList(),
                           onChanged: (newValue) {
-                            if (newValue != 2015 && newValue != state.year) {
+                            if (newValue != state.year) {
                               context
                                   .read<DistrictRankCubit>()
                                   .fetchData(state.team, newValue!);
