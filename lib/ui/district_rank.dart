@@ -51,6 +51,9 @@ class DistrictRankScreen extends StatelessWidget {
           appBar: AppBar(
             title: const Text('FRC District Ranking'),
             centerTitle: true,
+            leading: const Image(
+              image: AssetImage('assets/logo/logo.png')
+            ),
             actions: [
               IconButton(
                   icon: const Icon(
