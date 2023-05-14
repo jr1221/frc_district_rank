@@ -2,7 +2,7 @@
 
 Helpful app to see where your team stands
 
-![Main Page](main_page.png)
+![Main Page](web/main_page.png)
 
 ## About
 

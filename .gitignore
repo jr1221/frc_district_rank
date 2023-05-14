@@ -67,7 +67,6 @@
 **/ios/Runner/GeneratedPluginRegistrant.*
 
 # Web related
-**/web/**/lib/generated_plugin_registrant.dart
 
 # Service account files
 svc-keyfile.json
