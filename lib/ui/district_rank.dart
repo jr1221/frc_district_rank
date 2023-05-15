@@ -51,9 +51,7 @@ class DistrictRankScreen extends StatelessWidget {
           appBar: AppBar(
             title: const Text('FRC District Ranking'),
             centerTitle: true,
-            leading: const Image(
-              image: AssetImage('assets/logo/logo.png')
-            ),
+            leading: const Image(image: AssetImage('assets/logo/logo.png')),
             actions: [
               IconButton(
                   icon: const Icon(
@@ -62,7 +60,10 @@ class DistrictRankScreen extends StatelessWidget {
                   onPressed: () => Navigator.pushNamed(context, '/settings')),
             ],
           ),
-          body: DistrictRankHome(),
+          body: Padding(
+            padding: const EdgeInsetsDirectional.only(bottom: 21),
+            child: DistrictRankHome(),
+          ),
           bottomSheet: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
@@ -110,6 +111,7 @@ class DistrictRankHome extends StatelessWidget {
         case DistrictRankStatus.loading:
           break;
         case DistrictRankStatus.success:
+          _teamSelectTextController.clear();
           break;
         case DistrictRankStatus.failure:
           String showErrMessage =
@@ -257,6 +259,7 @@ class DistrictRankHome extends StatelessWidget {
                           icon: const Icon(
                             Icons.arrow_downward,
                           ),
+                          value: state.year,
                           iconSize: 28,
                           elevation: 16,
                           underline: Container(
@@ -271,10 +274,7 @@ class DistrictRankHome extends StatelessWidget {
                                     child: Text(
                                       value.toString(),
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          fontSize: 28,
-                                          color:
-                                              Theme.of(context).disabledColor),
+                                      style: const TextStyle(fontSize: 28),
                                     ),
                                   ),
                                   onTap: () => BotToast.showText(
@@ -375,6 +375,7 @@ class DistrictRankHome extends StatelessWidget {
                                                     if (_teamSelectFormKey
                                                         .currentState!
                                                         .validate()) {
+                                                      Navigator.pop(context);
                                                       int team = int.parse(
                                                           _teamSelectTextController
                                                               .text);
@@ -383,7 +384,6 @@ class DistrictRankHome extends StatelessWidget {
                                                               DistrictRankCubit>()
                                                           .fetchData(
                                                               team, state.year);
-                                                      Navigator.pop(context);
                                                       return;
                                                     }
                                                   },
@@ -492,40 +492,56 @@ class DistrictRankHome extends StatelessWidget {
                           'Leaderboard',
                           style: TextStyle(fontSize: 20),
                         ),
-                        expanded: Center(
-                          child: DataTable(
-                            columns: const <DataColumn>[
-                              DataColumn(
-                                label: Text(
-                                  'Rank',
-                                  style: TextStyle(
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                              ),
-                              DataColumn(
-                                label: Text(
-                                  'Team',
-                                  style: TextStyle(
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                              ),
-                              DataColumn(
-                                label: Text(
-                                  'Points',
-                                  style: TextStyle(
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                              ),
-                            ],
-                            rows: state.districtRankModel!.rowList(),
-                          ),
-                        ),
                         collapsed: const SizedBox(),
+                        expanded: Center(
+      child: Row(
+                          children: [
+                            Expanded(
+                                flex: 1,
+                                child: PaginatedDataTable(
+                                  showFirstLastButtons: true,
+                                  showCheckboxColumn: false,
+                                  initialFirstRowIndex: state
+                                      .districtRankModel!.districtRank
+                                      .closestLowerMultiple(10),
+                                  rowsPerPage: 10,
+                                  horizontalMargin: 60,
+                                  columns: const <DataColumn>[
+                                    DataColumn(
+                                      label: Text(
+                                        'Rank',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ),
+                                    DataColumn(
+                                      label: Text(
+                                        'Team',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ),
+                                    DataColumn(
+                                      label: Text(
+                                        'Points',
+                                        textAlign: TextAlign.right,
+                                        style: TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                  source: state.districtRankModel!
+                                      .rankingsSource(context),
+                                ))
+                          ],
+                        ),
                       ),
-                    ),
+                    ))
                   ],
                 ),
               ),
@@ -557,7 +573,9 @@ class DistrictRankHome extends StatelessWidget {
                     style: TextStyle(fontSize: 28.0),
                   ),
                   onPressed: () {
-                    context.read<DistrictRankCubit>().fetchData(ProjectConstants.defaultTeam, ProjectConstants.defaultYear);
+                    context.read<DistrictRankCubit>().fetchData(
+                        ProjectConstants.defaultTeam,
+                        ProjectConstants.defaultYear);
                   },
                 )
               ],
@@ -565,5 +583,15 @@ class DistrictRankHome extends StatelessWidget {
           }
       }
     });
+  }
+}
+
+extension ClosestMultiple on int {
+  int closestLowerMultiple(int multiple) {
+    int result = multiple * (this / multiple).truncate();
+    if (this % 10 == 0) {
+      result -= 10;
+    }
+    return result;
   }
 }

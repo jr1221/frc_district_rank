@@ -23,10 +23,17 @@ class DistrictRankRepository {
 
     try {
       await _fetchDistrictKey(team).then((districtList) async {
+        // throw exception if team not districted (empty year)
+        if (districtList.isEmpty) {
+          throw FetchException(
+              'Team $team does not have district records, perhaps they are too old or have not competed in district events.',
+              FetchExceptionType.noTeam);
+        }
+
         // iterate through the district and find the one for this year, or else throw the exception with nearby years
         DistrictList districtForThisYear = districtList
             .firstWhere((element) => year == element.year, orElse: () {
-          int closestYear = _sort(year, districtList.map((e) => e.year));
+          int closestYear = _closestYear(year, districtList.map((e) => e.year));
 
           throw FetchException(
               'Team $team does not have records from $year, maybe try $closestYear.',
@@ -127,16 +134,16 @@ class DistrictRankRepository {
     return response.data!.toList();
   }
 
-  int _sort(int year, Iterable<int> yearsRanked) {
-    // try bigger and smaller, yearsRanked sorted earliest ro most recent
-    if (year > yearsRanked.last) {
-      return yearsRanked.last;
-    }
-    if (year < yearsRanked.first) {
-      return yearsRanked.first;
+  /// finds the closest year to the current year
+  int _closestYear(int currentYear, Iterable<int> yearsRanked) {
+    ({int dist, int year}) smallestDistYear = (dist: 100000, year: -1);
+    for (int checkYear in yearsRanked) {
+      if ((checkYear - currentYear).abs() < smallestDistYear.dist) {
+        smallestDistYear =
+            (dist: (checkYear - currentYear).abs(), year: checkYear);
+      }
     }
 
-    // just give middle year
-    return yearsRanked.elementAt((yearsRanked.length / 2.0).round());
+    return smallestDistYear.year;
   }
 }

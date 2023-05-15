@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tba_api_dart_dio_client/tba_api_dart_dio_client.dart';
+
+import '../cubits/district_rank_cubit.dart';
 
 const Map<String, int> knownDistrictCapacities = {
   '2019chs': 58,
@@ -46,7 +49,7 @@ class DistrictRankModel {
         _districtKey = districtKey;
 
   // Uses _districtRankings
-  int get _districtRank {
+  int get districtRank {
     for (DistrictRanking element in _districtRankings) {
       if (element.teamKey == 'frc$_team') {
         return element.rank;
@@ -138,20 +141,25 @@ class DistrictRankModel {
   /// Returns the district rank pretty (ex. ##th)
   String get districtRankPretty {
     String districtRankPretty;
-    switch (_districtRank
-        .toString()
-        .substring(_districtRank.toString().length - 1)) {
-      case '1':
-        districtRankPretty = '${_districtRank}st';
-        break;
-      case '2':
-        districtRankPretty = '${_districtRank}nd';
-        break;
-      case '3':
-        districtRankPretty = '${_districtRank}rd';
-        break;
-      default:
-        districtRankPretty = '${_districtRank}th';
+    if ((11 <= districtRank && districtRank <= 13) ||
+        (111 <= districtRank && districtRank <= 113)) {
+      districtRankPretty = '${districtRank}th';
+    } else {
+      switch (districtRank
+          .toString()
+          .substring(districtRank.toString().length - 1)) {
+        case '1':
+          districtRankPretty = '${districtRank}st';
+          break;
+        case '2':
+          districtRankPretty = '${districtRank}nd';
+          break;
+        case '3':
+          districtRankPretty = '${districtRank}rd';
+          break;
+        default:
+          districtRankPretty = '${districtRank}th';
+      }
     }
     return districtRankPretty;
   }
@@ -182,37 +190,75 @@ class DistrictRankModel {
     return scoreInfo;
   }
 
-  // Uses - team, rankings
-  /// Returns the +- 6 teams in the district ranking leaderboard from the team that year
-  List<DataRow> rowList() {
-    List<DataRow> rowList = <DataRow>[];
-    for (DistrictRanking teamRanked in _districtRankings) {
-      if (_team.toString() == teamRanked.teamKey.substring(3)) {
-        rowList.add(DataRow(cells: <DataCell>[
-          DataCell(Text(teamRanked.rank.toString(),
-              style: const TextStyle(fontWeight: FontWeight.w900))),
-          DataCell(Text(
-            teamRanked.teamKey.substring(3),
-            style: const TextStyle(fontWeight: FontWeight.w900),
-          )),
-          DataCell(Text(teamRanked.pointTotal.toString(),
-              style: const TextStyle(fontWeight: FontWeight.w900))),
-        ]));
-      } else if (6 > (teamRanked.rank - _districtRank) &&
-          -6 < (teamRanked.rank - _districtRank)) {
-        rowList.add(DataRow(cells: <DataCell>[
-          DataCell(Text(
-            teamRanked.rank.toString(),
-          )),
-          DataCell(Text(
-            teamRanked.teamKey.substring(3),
-          )),
-          DataCell(Text(
-            teamRanked.pointTotal.toString(),
-          )),
-        ]));
-      }
-    }
-    return rowList;
+  // Uses - team, year, rankings
+  DataTableSource rankingsSource(BuildContext context) {
+    return RankingDataTableSource(_districtRankings, _team, _year, context);
   }
+}
+
+class RankingDataTableSource extends DataTableSource {
+  final List<DistrictRanking> _districtRankings;
+  final int _team;
+  final int _year;
+  final BuildContext _context;
+
+  RankingDataTableSource(
+      this._districtRankings, this._team, this._year, this._context);
+
+  @override
+  DataRow? getRow(int index) {
+    final teamRanked = _districtRankings.elementAt(index);
+    if (_team.toString() == teamRanked.teamKey.substring(3)) {
+      return DataRow.byIndex(index: index, cells: [
+        DataCell(
+          Text(teamRanked.rank.toString(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.w900)),
+        ),
+        DataCell(
+          Text(teamRanked.teamKey.substring(3),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.w900)),
+        ),
+        DataCell(
+          Text(teamRanked.pointTotal.toString(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.w900)),
+        ),
+      ]);
+    } else {
+      return DataRow.byIndex(index: index, cells: [
+        DataCell(
+          Text(
+            textAlign: TextAlign.center,
+            teamRanked.rank.toString(),
+          ),
+        ),
+        DataCell(
+          Text(
+            textAlign: TextAlign.center,
+            teamRanked.teamKey.substring(3),
+          ),
+          onTap: () => _context
+              .read<DistrictRankCubit>()
+              .fetchData(int.parse(teamRanked.teamKey.substring(3)), _year),
+        ),
+        DataCell(
+          Text(
+            textAlign: TextAlign.center,
+            teamRanked.pointTotal.toString(),
+          ),
+        ),
+      ]);
+    }
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => _districtRankings.length;
+
+  @override
+  int get selectedRowCount => 0;
 }
