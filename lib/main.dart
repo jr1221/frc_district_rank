@@ -7,6 +7,7 @@ import 'constants.dart';
 
 void main() async {
   await Hive.initFlutter();
+  await Hive.openBox<List<int>>(ProjectConstants.favoriteTeamsBoxKey);
   await Future.wait([
     Hive.openBox<String>(ProjectConstants.settingsBoxKey),
     CacheManager.init()

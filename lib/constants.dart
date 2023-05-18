@@ -15,6 +15,10 @@ class ProjectConstants {
 
   static const String colorSchemeStorageKey = 'colorScheme';
 
+  static const String favoriteTeamsBoxKey = 'favTeamsBox';
+  static const String favoriteTeamsStorageKey = 'favTeams';
+  static const String favoriteTeamsDefault = '';
+
   static const String tempDirFolderAppend = '/frc_district_rankHIVE';
 
   static const avatarW = 40;

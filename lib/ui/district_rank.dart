@@ -24,6 +24,8 @@ class DistrictRankScreen extends StatelessWidget {
     return BlocProvider(
         create: (context) {
           final settings = Hive.box<String>(ProjectConstants.settingsBoxKey);
+          Hive.box<List<int>>(ProjectConstants.favoriteTeamsBoxKey)
+              .put(ProjectConstants.favoriteTeamsStorageKey, [237, 195, 118]);
           int prevLaunchTeam = int.parse(settings.get(
               ProjectConstants.lastTeamStorageKey,
               defaultValue: ProjectConstants.defaultTeam.toString())!);
@@ -156,6 +158,10 @@ class DistrictRankHome extends StatelessWidget {
         case DistrictRankStatus.success:
         case DistrictRankStatus.failure:
           if (state.districtRankModel != null) {
+            final favoriteTeamRecord =
+                Hive.box<List<int>>(ProjectConstants.favoriteTeamsBoxKey).get(
+                    ProjectConstants.favoriteTeamsStorageKey,
+                    defaultValue: [])!;
             return RefreshIndicator(
               child: ExpandableTheme(
                 data: ExpandableThemeData(
@@ -319,79 +325,105 @@ class DistrictRankHome extends StatelessWidget {
                                   return BlocProvider<DistrictRankCubit>.value(
                                     value: context.read<DistrictRankCubit>(),
                                     child: AlertDialog(
-                                      scrollable: true,
-                                      title: const Text(
-                                        'Enter Team Number',
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      actionsAlignment:
-                                          MainAxisAlignment.center,
-                                      actionsPadding: const EdgeInsets.only(
-                                          left: 16.0, right: 16.0),
-                                      contentPadding:
-                                          const EdgeInsets.only(bottom: 6.0),
-                                      content: Form(
-                                        key: _teamSelectFormKey,
-                                        child: TextFormField(
-                                          autofocus: true,
-                                          keyboardType: TextInputType.number,
+                                        scrollable: true,
+                                        title: const Text(
+                                          'Enter Team Number',
                                           textAlign: TextAlign.center,
-                                          controller: _teamSelectTextController,
-                                          decoration: const InputDecoration(
-                                            hintText:
-                                                'Team # from last 7 years',
-                                          ),
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.isEmpty ||
-                                                int.tryParse(value) == null) {
-                                              return 'Empty or incorrect team number';
-                                            }
-                                            return null;
-                                          },
-                                          onFieldSubmitted: (value) {
-                                            if (_teamSelectFormKey.currentState!
-                                                .validate()) {
-                                              int team = int.parse(
-                                                  _teamSelectTextController
-                                                      .text);
-                                              context
-                                                  .read<DistrictRankCubit>()
-                                                  .fetchData(team, state.year);
-                                              Navigator.pop(context);
-                                              return;
-                                            }
-                                          },
                                         ),
-                                      ),
-                                      actions: <Widget>[
-                                        Flex(
-                                            direction: Axis.horizontal,
-                                            children: [
-                                              Expanded(
-                                                child: ElevatedButton(
-                                                  child: const Text('Save'),
-                                                  onPressed: () {
-                                                    if (_teamSelectFormKey
-                                                        .currentState!
-                                                        .validate()) {
-                                                      Navigator.pop(context);
-                                                      int team = int.parse(
-                                                          _teamSelectTextController
-                                                              .text);
-                                                      context
-                                                          .read<
-                                                              DistrictRankCubit>()
-                                                          .fetchData(
-                                                              team, state.year);
-                                                      return;
-                                                    }
-                                                  },
-                                                ),
+                                        actionsAlignment:
+                                            MainAxisAlignment.center,
+                                        actionsPadding: const EdgeInsets.only(
+                                            left: 16.0, right: 16.0),
+                                        contentPadding:
+                                            const EdgeInsets.only(bottom: 6.0),
+                                        content: Form(
+                                          key: _teamSelectFormKey,
+                                          child: TextFormField(
+                                            autofocus: true,
+                                            keyboardType: TextInputType.number,
+                                            textAlign: TextAlign.center,
+                                            controller:
+                                                _teamSelectTextController,
+                                            decoration: const InputDecoration(
+                                              hintText:
+                                                  'Team # from last 7 years',
+                                            ),
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.isEmpty ||
+                                                  int.tryParse(value) == null) {
+                                                return 'Empty or incorrect team number';
+                                              }
+                                              return null;
+                                            },
+                                            onFieldSubmitted: (value) {
+                                              if (_teamSelectFormKey
+                                                  .currentState!
+                                                  .validate()) {
+                                                int team = int.parse(
+                                                    _teamSelectTextController
+                                                        .text);
+                                                context
+                                                    .read<DistrictRankCubit>()
+                                                    .fetchData(
+                                                        team, state.year);
+                                                Navigator.pop(context);
+                                                return;
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                        actions: <Widget>[
+                                          Row(children: [
+                                            Expanded(
+                                              child: ElevatedButton(
+                                                child: const Text('Save'),
+                                                onPressed: () {
+                                                  if (_teamSelectFormKey
+                                                      .currentState!
+                                                      .validate()) {
+                                                    Navigator.pop(context);
+                                                    int team = int.parse(
+                                                        _teamSelectTextController
+                                                            .text);
+                                                    context
+                                                        .read<
+                                                            DistrictRankCubit>()
+                                                        .fetchData(
+                                                            team, state.year);
+                                                    return;
+                                                  }
+                                                },
                                               ),
-                                            ])
-                                      ],
-                                    ),
+                                            ),
+                                          ]),
+                                          if (favoriteTeamRecord.isNotEmpty)
+                                            const Divider(),
+                                          if (favoriteTeamRecord.isNotEmpty)
+                                            const Center(
+                                                child: Text('Favorites')),
+                                          if (favoriteTeamRecord.isNotEmpty)
+                                            Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: favoriteTeamRecord
+                                                    .map<Widget>((team) =>
+                                                        TextButton(
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                  context);
+                                                              context
+                                                                  .read<
+                                                                      DistrictRankCubit>()
+                                                                  .fetchData(
+                                                                      team,
+                                                                      state
+                                                                          .year);
+                                                            },
+                                                            child:
+                                                                Text('$team')))
+                                                    .toList())
+                                        ]),
                                   );
                                 });
                           }),
@@ -484,64 +516,110 @@ class DistrictRankHome extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      // expander leaderboard
-                      padding:
-                          const EdgeInsets.only(left: 16, right: 16, top: 20),
-                      child: ExpandablePanel(
-                        header: const Text(
-                          'Leaderboard',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        collapsed: const SizedBox(),
-                        expanded: Center(
-      child: Row(
-                          children: [
-                            Expanded(
-                                flex: 1,
-                                child: PaginatedDataTable(
-                                  showFirstLastButtons: true,
-                                  showCheckboxColumn: false,
-                                  initialFirstRowIndex: state
-                                      .districtRankModel!.districtRank
-                                      .closestLowerMultiple(10),
-                                  rowsPerPage: 10,
-                                  horizontalMargin: 60,
-                                  columns: const <DataColumn>[
-                                    DataColumn(
-                                      label: Text(
-                                        'Rank',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontStyle: FontStyle.italic,
+                        // expander leaderboard
+                        padding:
+                            const EdgeInsets.only(left: 16, right: 16, top: 20),
+                        child: ExpandablePanel(
+                          header: const Text(
+                            'Leaderboard',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          collapsed: const SizedBox(),
+                          expanded: Center(
+                            child: Row(
+                              children: [
+                                Expanded(
+                                    flex: 1,
+                                    child: PaginatedDataTable(
+                                      showFirstLastButtons: true,
+                                      showCheckboxColumn: false,
+                                      initialFirstRowIndex: state
+                                          .districtRankModel!.districtRank
+                                          .closestLowerMultiple(10),
+                                      rowsPerPage: 10,
+                                      horizontalMargin: 60,
+                                      columns: const <DataColumn>[
+                                        DataColumn(
+                                          label: Text(
+                                            'Rank',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                    DataColumn(
-                                      label: Text(
-                                        'Team',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontStyle: FontStyle.italic,
+                                        DataColumn(
+                                          label: Text(
+                                            'Team',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                    DataColumn(
-                                      label: Text(
-                                        'Points',
-                                        textAlign: TextAlign.right,
-                                        style: TextStyle(
-                                          fontStyle: FontStyle.italic,
+                                        DataColumn(
+                                          label: Text(
+                                            'Points',
+                                            textAlign: TextAlign.right,
+                                            style: TextStyle(
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  ],
-                                  source: state.districtRankModel!
-                                      .rankingsSource(context),
-                                ))
-                          ],
-                        ),
-                      ),
-                    ))
+                                      ],
+                                      source: state.districtRankModel!
+                                          .rankingsSource(context),
+                                    ))
+                              ],
+                            ),
+                          ),
+                        )),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (favoriteTeamRecord.contains(state.team))
+                          IconButton(
+                              onPressed: () {
+                                favoriteTeamRecord.remove(state.team);
+                                Hive.box<List<int>>(
+                                        ProjectConstants.favoriteTeamsBoxKey)
+                                    .put(
+                                        ProjectConstants
+                                            .favoriteTeamsStorageKey,
+                                        favoriteTeamRecord);
+                                context.read<DistrictRankCubit>().fetchData(
+                                    state.team,
+                                    state
+                                        .year); // TODO restate icon without reloading
+                              },
+                              icon: const Icon(Icons.star)),
+                        if (!favoriteTeamRecord.contains(state.team))
+                          IconButton(
+                              onPressed: () {
+                                if (favoriteTeamRecord.length >= 5) {
+                                  BotToast.showText(
+                                      text:
+                                          'No more than 5 favorites are allowed.');
+                                  return;
+                                }
+                                favoriteTeamRecord.add(state.team);
+                                Hive.box<List<int>>(
+                                        ProjectConstants.favoriteTeamsBoxKey)
+                                    .put(
+                                        ProjectConstants
+                                            .favoriteTeamsStorageKey,
+                                        favoriteTeamRecord);
+                                context
+                                    .read<DistrictRankCubit>()
+                                    .fetchData(state.team, state.year);
+                              },
+                              icon: const Icon(Icons.star_border)),
+                        if (favoriteTeamRecord.contains(state.team))
+                          const Text('Unset Favorite'),
+                        if (!favoriteTeamRecord.contains(state.team))
+                          const Text('Set Favorite')
+                      ],
+                    )
                   ],
                 ),
               ),
