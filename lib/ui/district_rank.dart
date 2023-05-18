@@ -24,8 +24,6 @@ class DistrictRankScreen extends StatelessWidget {
     return BlocProvider(
         create: (context) {
           final settings = Hive.box<String>(ProjectConstants.settingsBoxKey);
-          Hive.box<List<int>>(ProjectConstants.favoriteTeamsBoxKey)
-              .put(ProjectConstants.favoriteTeamsStorageKey, [237, 195, 118]);
           int prevLaunchTeam = int.parse(settings.get(
               ProjectConstants.lastTeamStorageKey,
               defaultValue: ProjectConstants.defaultTeam.toString())!);
@@ -159,9 +157,9 @@ class DistrictRankHome extends StatelessWidget {
         case DistrictRankStatus.failure:
           if (state.districtRankModel != null) {
             final favoriteTeamRecord =
-                Hive.box<List<int>>(ProjectConstants.favoriteTeamsBoxKey).get(
-                    ProjectConstants.favoriteTeamsStorageKey,
-                    defaultValue: [])!;
+                Hive.box<List<dynamic>>(ProjectConstants.favoriteTeamsBoxKey)
+                    .get(ProjectConstants.favoriteTeamsStorageKey,
+                        defaultValue: <int>[])!.cast<int>();
             return RefreshIndicator(
               child: ExpandableTheme(
                 data: ExpandableThemeData(
@@ -581,7 +579,7 @@ class DistrictRankHome extends StatelessWidget {
                           IconButton(
                               onPressed: () {
                                 favoriteTeamRecord.remove(state.team);
-                                Hive.box<List<int>>(
+                                Hive.box<List<dynamic>>(
                                         ProjectConstants.favoriteTeamsBoxKey)
                                     .put(
                                         ProjectConstants
@@ -603,7 +601,7 @@ class DistrictRankHome extends StatelessWidget {
                                   return;
                                 }
                                 favoriteTeamRecord.add(state.team);
-                                Hive.box<List<int>>(
+                                Hive.box<List<dynamic>>(
                                         ProjectConstants.favoriteTeamsBoxKey)
                                     .put(
                                         ProjectConstants

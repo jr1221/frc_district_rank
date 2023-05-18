@@ -17,7 +17,7 @@ class ProjectConstants {
 
   static const String favoriteTeamsBoxKey = 'favTeamsBox';
   static const String favoriteTeamsStorageKey = 'favTeams';
-  static const String favoriteTeamsDefault = '';
+  static const List<int> favoriteTeamsDefault = [];
 
   static const String tempDirFolderAppend = '/frc_district_rankHIVE';
 
