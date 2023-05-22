@@ -2,7 +2,6 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:settings_ui/settings_ui.dart';
 
 import '../cache_manager.dart';
 import '../constants.dart';
@@ -22,17 +21,28 @@ class SettingsScreen extends StatelessWidget {
             valueListenable:
                 Hive.box<String>(ProjectConstants.settingsBoxKey).listenable(),
             builder: (context, box, widget) {
-              return SettingsList(
-                sections: [
-                  SettingsSection(
-                    title: const Text('General'),
-                    tiles: <SettingsTile>[
-                      SettingsTile.switchTile(
-                          title: const Text('Use System Dark Mode'),
-                          // true if no preference set in settings
-                          initialValue: !box
+              List<Widget> generalSettings = [
+                Row(children: [
+                  Expanded(
+                      child: Padding(
+                    padding: EdgeInsetsDirectional.only(
+                      start: 24,
+                      end: 24,
+                      bottom: 19 * MediaQuery.of(context).textScaleFactor,
+                      top: 19 * MediaQuery.of(context).textScaleFactor,
+                    ),
+                    child: Text(
+                      'Use System Dark Mode',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  )),
+                  Padding(
+                      padding:
+                          const EdgeInsetsDirectional.only(start: 16, end: 8),
+                      child: Switch(
+                          value: !box
                               .containsKey(ProjectConstants.darkModeStorageKey),
-                          onToggle: (bool value) {
+                          onChanged: (bool value) {
                             if (value) {
                               // remove preference from hive
                               box.delete(ProjectConstants.darkModeStorageKey);
@@ -46,131 +56,237 @@ class SettingsScreen extends StatelessWidget {
                                           Brightness.dark)
                                       .toString());
                             }
-                          }),
-                      // if user preference set, show dark theme switch
-                      if (box.containsKey(ProjectConstants.darkModeStorageKey))
-                        SettingsTile.switchTile(
-                          title: const Text('Use Dark Mode'),
-                          // current theme preference
-                          initialValue:
-                              box.get(ProjectConstants.darkModeStorageKey) ==
-                                  'true',
-                          onToggle: (bool value) {
-                            // put preference into hive darkMode
-                            box.put(ProjectConstants.darkModeStorageKey,
-                                value.toString());
+                          }))
+                ]),
+                if (box.containsKey(ProjectConstants.darkModeStorageKey))
+                  Row(children: [
+                    Expanded(
+                        child: Padding(
+                      padding: EdgeInsetsDirectional.only(
+                        start: 24,
+                        end: 24,
+                        bottom: 19 * MediaQuery.of(context).textScaleFactor,
+                        top: 19 * MediaQuery.of(context).textScaleFactor,
+                      ),
+                      child: Text(
+                        'Use Dark Mode',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    )),
+                    Padding(
+                        padding:
+                            const EdgeInsetsDirectional.only(start: 16, end: 8),
+                        child: Switch(
+                            value:
+                                box.get(ProjectConstants.darkModeStorageKey) ==
+                                    'true',
+                            onChanged: (bool value) {
+                              box.put(ProjectConstants.darkModeStorageKey,
+                                  value.toString());
+                            }))
+                  ]),
+                InkWell(
+                    onTap: () async => await ColorPicker(
+                          color: Color(int.parse(box.get(
+                              ProjectConstants.colorSchemeStorageKey,
+                              defaultValue:
+                                  Colors.blueGrey.value.toString())!)),
+                          onColorChanged: (Color color) {},
+                          onColorChangeEnd: (Color color) =>
+                              _changeColorValue(color.value),
+                          heading: Text(
+                            'Select color',
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                          wheelSubheading: Text(
+                            'Selected color and its shades',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          showMaterialName: true,
+                          showColorName: true,
+                          showColorCode: true,
+                          enableShadesSelection: false,
+                          enableTonalPalette: false,
+                          copyPasteBehavior: const ColorPickerCopyPasteBehavior(
+                            copyFormat: ColorPickerCopyFormat.hexRRGGBB,
+                            longPressMenu: true,
+                          ),
+                          pickersEnabled: const <ColorPickerType, bool>{
+                            ColorPickerType.both: true,
+                            ColorPickerType.primary: false,
+                            ColorPickerType.accent: false,
+                            ColorPickerType.bw: false,
+                            ColorPickerType.custom: false,
+                            ColorPickerType.wheel: true,
                           },
+                        ).showPickerDialog(context),
+                    child: Row(children: [
+                      Expanded(
+                          child: Padding(
+                        padding: EdgeInsetsDirectional.only(
+                          start: 24,
+                          end: 24,
+                          bottom: 19 * MediaQuery.of(context).textScaleFactor,
+                          top: 19 * MediaQuery.of(context).textScaleFactor,
                         ),
-                      SettingsTile.navigation(
-                        title: const Text('Color Theme'),
-                        description: const Text('Change the color theming'),
-                        // current colorScheme for theme in hive
-                        trailing: ColorIndicator(
-                            color: Color(int.parse(box.get(
-                                ProjectConstants.colorSchemeStorageKey,
-                                defaultValue:
-                                    Colors.blueGrey.value.toString())!))),
-                        onPressed: (context) async {
-                          {
-                            await ColorPicker(
+                        child: Text(
+                          'Change Color Theme',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      )),
+                      Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: ColorIndicator(
                               color: Color(int.parse(box.get(
                                   ProjectConstants.colorSchemeStorageKey,
                                   defaultValue:
-                                      Colors.blueGrey.value.toString())!)),
-                              onColorChanged: (Color color) {},
-                              onColorChangeEnd: (Color color) =>
-                                  _changeColorValue(color.value),
-                              heading: Text(
-                                'Select color',
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall,
-                              ),
-                              wheelSubheading: Text(
-                                'Selected color and its shades',
-                                style: Theme.of(context).textTheme.titleSmall,
-                              ),
-                              showMaterialName: true,
-                              showColorName: true,
-                              showColorCode: true,
-                              enableShadesSelection: false,
-                              enableTonalPalette: false,
-                              copyPasteBehavior:
-                                  const ColorPickerCopyPasteBehavior(
-                                copyFormat: ColorPickerCopyFormat.hexRRGGBB,
-                                longPressMenu: true,
-                              ),
-                              pickersEnabled: const <ColorPickerType, bool>{
-                                ColorPickerType.both: true,
-                                ColorPickerType.primary: false,
-                                ColorPickerType.accent: false,
-                                ColorPickerType.bw: false,
-                                ColorPickerType.custom: false,
-                                ColorPickerType.wheel: true,
-                              },
-                            ).showPickerDialog(context);
-                          }
-                        },
-                      )
-                    ],
-                  ),
-                  /*       SettingsSection(
-                    title: const Text('Notifications'),
-                    tiles: [
-                      SettingsTile(
-                        title: const Text('Change Team'),
-                        onPressed: (context) {},
-                      ),
-                      SettingsTile.switchTile(
-                        title: const Text('District Rank Notifications'),
-                        onToggle: (bool value) async {},
-                        initialValue: false,
-                      ),
-                    ],
-                  ), */
-                  SettingsSection(
-                    title: const Text('Advanced'),
-                    tiles: <SettingsTile>[
-                      SettingsTile(
-                        title: const Text('Clear cache'),
-                        onPressed: (context) async {
-                          try {
-                            CacheManager.hiveCacheStore!.clean();
-                            BotToast.showText(
-                                text: 'Successfully cleared cache!');
-                          } catch (e) {
-                            BotToast.showText(text: 'Error: $e');
-                          }
-                        },
-                      ),
-                      SettingsTile(
-                          title: const Text('Clear preferences'),
-                          onPressed: (context) async {
-                            try {
-                              await Hive.box<String>(
-                                      ProjectConstants.settingsBoxKey)
-                                  .clear();
-                              BotToast.showText(
-                                  text: 'Successfully cleared preferences!');
-                            } catch (e) {
-                              BotToast.showText(text: 'Error: $e');
-                            }
-                          })
-                    ],
-                  ),
-                  const CustomSettingsSection(
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 16,
-                        ),
-                        Text(
-                          'Version: 1.2.1',
-                        ),
-                      ],
+                                      Colors.blueGrey.value.toString())!))))
+                    ])),
+              ];
+              List<Widget> advancedSettings = [
+                InkWell(
+                  onTap: () async {
+                    try {
+                      CacheManager.hiveCacheStore!.clean();
+                      BotToast.showText(text: 'Successfully cleared cache!');
+                    } catch (e) {
+                      BotToast.showText(text: 'Error: $e');
+                    }
+                  },
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.only(
+                      start: 24,
+                      end: 24,
+                      bottom: 19 * MediaQuery.of(context).textScaleFactor,
+                      top: 19 * MediaQuery.of(context).textScaleFactor,
+                    ),
+                    child: Text(
+                      'Clear cache',
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
-                ],
-              );
+                ),
+                InkWell(
+                  onTap: () async {
+                    try {
+                      await Hive.box<String>(ProjectConstants.settingsBoxKey)
+                          .clear();
+                      BotToast.showText(
+                          text: 'Successfully cleared preferences!');
+                    } catch (e) {
+                      BotToast.showText(text: 'Error: $e');
+                    }
+                  },
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.only(
+                      start: 24,
+                      end: 24,
+                      bottom: 19 * MediaQuery.of(context).textScaleFactor,
+                      top: 19 * MediaQuery.of(context).textScaleFactor,
+                    ),
+                    child: Text(
+                      'Clear preferences',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                ),
+              ];
+
+              return Container(
+                  width: MediaQuery.of(context).size.width,
+                  alignment: Alignment.center,
+                  child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 810),
+                      child: ListView(children: [
+                        Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                height:
+                                    65 * MediaQuery.of(context).textScaleFactor,
+                                padding: EdgeInsetsDirectional.only(
+                                  bottom: 5 *
+                                      MediaQuery.of(context).textScaleFactor,
+                                  start: 6,
+                                  top: 40 *
+                                      MediaQuery.of(context).textScaleFactor,
+                                ),
+                                child: Text('General',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
+                              ),
+                              Card(
+                                elevation: 4,
+                                child: ListView.separated(
+                                  shrinkWrap: true,
+                                  itemCount: generalSettings.length,
+                                  padding: EdgeInsets.zero,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return generalSettings[index];
+                                  },
+                                  separatorBuilder:
+                                      (BuildContext context, int index) {
+                                    return const Divider(
+                                      height: 0,
+                                      thickness: 1,
+                                    );
+                                  },
+                                ),
+                              )
+                            ]),
+                        Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                height:
+                                    65 * MediaQuery.of(context).textScaleFactor,
+                                padding: EdgeInsetsDirectional.only(
+                                  bottom: 5 *
+                                      MediaQuery.of(context).textScaleFactor,
+                                  start: 6,
+                                  top: 40 *
+                                      MediaQuery.of(context).textScaleFactor,
+                                ),
+                                child: Text('Advanced',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium),
+                              ),
+                              Card(
+                                elevation: 4,
+                                child: ListView.separated(
+                                  shrinkWrap: true,
+                                  itemCount: advancedSettings.length,
+                                  padding: EdgeInsets.zero,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return advancedSettings[index];
+                                  },
+                                  separatorBuilder:
+                                      (BuildContext context, int index) {
+                                    return const Divider(
+                                      height: 0,
+                                      thickness: 1,
+                                    );
+                                  },
+                                ),
+                              )
+                            ]),
+                        const Column(
+                          children: [
+                            SizedBox(
+                              height: 16,
+                            ),
+                            Text(
+                              'Version: 1.2.2',
+                            ),
+                          ],
+                        ),
+                      ])));
             }));
   }
 
@@ -179,87 +295,3 @@ class SettingsScreen extends StatelessWidget {
         .put(ProjectConstants.colorSchemeStorageKey, colorValue.toString());
   }
 }
-
-/*
-    Widget _teamAskDialog() {
-      return AlertDialog(
-        title: const Text(
-          'Enter Team Number',
-          textAlign: TextAlign.center,
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Form(
-              key: _teamSelectFormKey,
-              child: Column(
-                children: <Widget>[
-                  TextFormField(
-                    autofocus: true,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    controller: _teamSelectTextController,
-                    validator: (value) {
-                      if (value == null ||
-                          value.isEmpty ||
-                          int.tryParse(value) == null) {
-                        return 'Empty or incorrect team number';
-                      }
-                      return null;
-                    },
-                    onFieldSubmitted: (value) async {
-                      if (_teamSelectFormKey.currentState!.validate()) {
-                        await notifCreate();
-                        setState(() {
-                          GetStorage().write(Constants.teamNotifStorageKey,
-                              int.parse(_teamSelectTextController.text));
-                          GetStorage().read(Constants.shoudNotifStorageKey) ??
-                              GetStorage()
-                                  .write(Constants.shoudNotifStorageKey, false);
-                          Workmanager().cancelAll();
-                        });
-                        Navigator.pop(context);
-                      }
-                    },
-                    decoration: const InputDecoration(
-                      hintText: 'Team # from last 7 years',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    if (_teamSelectFormKey.currentState!.validate()) {
-                      await notifCreate();
-                      setState(() {
-                        GetStorage().write(Constants.teamNotifStorageKey,
-                            int.parse(_teamSelectTextController.text));
-                        GetStorage().read(Constants.shoudNotifStorageKey) ??
-                            GetStorage()
-                                .write(Constants.shoudNotifStorageKey, false);
-                        Workmanager().cancelAll();
-                      });
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: const Text('Save'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      );
-    }
-  }
-    );
-  }
-} */
