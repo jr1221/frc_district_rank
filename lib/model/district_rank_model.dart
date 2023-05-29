@@ -65,9 +65,10 @@ class DistrictRankModel {
     try {
       if (_avatarMedia.isNotEmpty &&
           _avatarMedia.first.details.toString().contains('base64Image')) {
-        baseAvatar = _avatarMedia.first.details!
-            .toString()
-            .substring(14, _avatarMedia.first.details.toString().length - 1);
+        baseAvatar = _avatarMedia.first.details!.toString().substring(
+              14,
+              _avatarMedia.first.details.toString().length - 1,
+            );
       }
     } catch (_) {}
 
@@ -89,8 +90,10 @@ class DistrictRankModel {
 
   // Uses teamObj
   /// Returns the team website in https:// format, or null if none listed
-  String? get teamWebsite =>
-      _teamObj.website?.replaceFirst('http://', 'https://');
+  String? get teamWebsite => _teamObj.website?.replaceFirst(
+        'http://',
+        'https://',
+      );
 
   // Uses - awards, team
   /// Returns the team awards in that year, or a message saying no awards were won that year
@@ -192,7 +195,12 @@ class DistrictRankModel {
 
   // Uses - team, year, rankings
   DataTableSource rankingsSource(BuildContext context) {
-    return RankingDataTableSource(_districtRankings, _team, _year, context);
+    return RankingDataTableSource(
+      _districtRankings,
+      _team,
+      _year,
+      context,
+    );
   }
 }
 
@@ -203,7 +211,11 @@ class RankingDataTableSource extends DataTableSource {
   final BuildContext _context;
 
   RankingDataTableSource(
-      this._districtRankings, this._team, this._year, this._context);
+    this._districtRankings,
+    this._team,
+    this._year,
+    this._context,
+  );
 
   @override
   DataRow? getRow(int index) {
@@ -211,45 +223,54 @@ class RankingDataTableSource extends DataTableSource {
     if (_team.toString() == teamRanked.teamKey.substring(3)) {
       return DataRow.byIndex(index: index, cells: [
         DataCell(
-          Text(teamRanked.rank.toString(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.w900)),
+          Text(
+            teamRanked.rank.toString(),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.w900),
+          ),
         ),
         DataCell(
-          Text(teamRanked.teamKey.substring(3),
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.w900)),
+          Text(
+            teamRanked.teamKey.substring(3),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.w900),
+          ),
         ),
         DataCell(
-          Text(teamRanked.pointTotal.toString(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.w900)),
+          Text(
+            teamRanked.pointTotal.toString(),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.w900),
+          ),
         ),
       ]);
     } else {
-      return DataRow.byIndex(index: index, cells: [
-        DataCell(
-          Text(
-            textAlign: TextAlign.center,
-            teamRanked.rank.toString(),
+      return DataRow.byIndex(
+        index: index,
+        cells: [
+          DataCell(
+            Text(
+              textAlign: TextAlign.center,
+              teamRanked.rank.toString(),
+            ),
           ),
-        ),
-        DataCell(
-          Text(
-            textAlign: TextAlign.center,
-            teamRanked.teamKey.substring(3),
+          DataCell(
+            Text(
+              textAlign: TextAlign.center,
+              teamRanked.teamKey.substring(3),
+            ),
+            onTap: () => _context
+                .read<DistrictRankCubit>()
+                .fetchData(int.parse(teamRanked.teamKey.substring(3)), _year),
           ),
-          onTap: () => _context
-              .read<DistrictRankCubit>()
-              .fetchData(int.parse(teamRanked.teamKey.substring(3)), _year),
-        ),
-        DataCell(
-          Text(
-            textAlign: TextAlign.center,
-            teamRanked.pointTotal.toString(),
+          DataCell(
+            Text(
+              textAlign: TextAlign.center,
+              teamRanked.pointTotal.toString(),
+            ),
           ),
-        ),
-      ]);
+        ],
+      );
     }
   }
 

@@ -1,6 +1,11 @@
 part of 'district_rank_cubit.dart';
 
-enum DistrictRankStatus { initial, loading, success, failure }
+enum DistrictRankStatus {
+  initial,
+  loading,
+  success,
+  failure,
+}
 
 class DistrictRankState {
   final DistrictRankStatus status;
@@ -9,24 +14,27 @@ class DistrictRankState {
   final DistrictRankModel? districtRankModel;
   final Exception? exception;
 
-  const DistrictRankState(
-      {this.status = DistrictRankStatus.initial,
-      this.year = ProjectConstants.defaultYear,
-      this.team = ProjectConstants.defaultTeam,
-      this.districtRankModel,
-      this.exception});
+  const DistrictRankState({
+    this.status = DistrictRankStatus.initial,
+    this.year = ProjectConstants.defaultYear,
+    this.team = ProjectConstants.defaultTeam,
+    this.districtRankModel,
+    this.exception,
+  });
 
-  DistrictRankState copyWith(
-      {DistrictRankStatus? status,
-      int? year,
-      int? team,
-      DistrictRankModel? districtRankModel,
-      Exception? exception}) {
+  DistrictRankState copyWith({
+    DistrictRankStatus? status,
+    int? year,
+    int? team,
+    DistrictRankModel? districtRankModel,
+    Exception? exception,
+  }) {
     return DistrictRankState(
-        status: status ?? this.status,
-        year: year ?? this.year,
-        team: team ?? this.team,
-        districtRankModel: districtRankModel ?? this.districtRankModel,
-        exception: exception ?? this.exception);
+      status: status ?? this.status,
+      year: year ?? this.year,
+      team: team ?? this.team,
+      districtRankModel: districtRankModel ?? this.districtRankModel,
+      exception: exception ?? this.exception,
+    );
   }
 }

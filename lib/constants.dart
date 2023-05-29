@@ -1,4 +1,4 @@
-class ProjectConstants {
+final class ProjectConstants {
   static const int defaultTeam = 1;
   static const int defaultYear = 2021;
 
